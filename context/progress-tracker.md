@@ -8,11 +8,12 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Build the editor chrome.
+- Build authentication.
 
 ## Completed
 
 - 01 — Design system and UI primitives
+- 02 — Editor chrome
 
 ## In Progress
 
@@ -20,7 +21,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- 02 — Editor chrome
+- 03 — Authentication
 
 ## Open Questions
 
@@ -29,6 +30,7 @@ Update this file whenever the current phase, active feature, or implementation s
 ## Architecture Decisions
 
 - shadcn/ui uses the Radix Nova preset with a dark-only token theme defined in `app/globals.css`.
+- Editor chrome owns sidebar visibility in the client page; the sidebar floats above the canvas rather than shifting it.
 
 ## Session Notes
 
