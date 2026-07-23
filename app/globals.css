@@ -1,8 +1,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "tailwindcss/preflight";
+@import "@clerk/ui/themes/shadcn.css";
 
-@tailwind base;
-@tailwind components;
 @tailwind utilities;
 
 @custom-variant dark (&:is(.dark *));
@@ -97,4 +97,68 @@
   body {
     @apply bg-base text-copy-primary antialiased;
   }
+
+  /* ── Clerk global overrides ─────────────────────────────── */
+
+  /* Font inheritance */
+  .cl-rootBox,
+  .cl-card,
+  .cl-cardBox,
+  .cl-signIn-root,
+  .cl-signUp-root {
+    font-family: var(--font-geist-sans) !important;
+  }
+
+  /* Force rootBox to fill its flex container and center its child card */
+  .cl-rootBox {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  /* cardBox: same — full width, center the card */
+  .cl-cardBox {
+    width: 100% !important;
+    max-width: 440px !important;
+    display: flex !important;
+    justify-content: center !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* The actual card — keep our custom bg/border from the appearance prop.
+     Only strip what Clerk might inject on top of our custom classes. */
+  .cl-card {
+    box-shadow: none !important;
+  }
+
+  /* Continue button arrow ▶ */
+  .cl-formButtonPrimary::after {
+    content: " \25B6";
+    font-size: 8px;
+    margin-left: 6px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  /* Development mode banner — amber to match reference */
+  .cl-internal-b3fm6y,
+  [data-localization-key="developmentMode"],
+  .cl-footer [class*="developmentMode"],
+  .cl-footer [class*="Development"],
+  .cl-badge[data-variant="shadow"],
+  .cl-badge {
+    color: #f59e0b !important;
+  }
+
+  /* Clerk footer area — no background, no top border */
+  .cl-footer {
+    background: transparent !important;
+    background-color: transparent !important;
+    border-top: none !important;
+    box-shadow: none !important;
+  }
 }
+
