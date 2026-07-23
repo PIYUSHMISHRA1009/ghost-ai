@@ -160,5 +160,51 @@
     border-top: none !important;
     box-shadow: none !important;
   }
-}
 
+  /* ── UserButton popup card — dark theme ──────────────────── */
+
+  /* Popup card outer container */
+  .cl-userButtonPopoverCard {
+    background-color: #111114 !important;
+    border: 1px solid #2a2a30 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  /* User info section at the top of the popup */
+  .cl-userButtonPopoverActionButton {
+    border-radius: 10px !important;
+  }
+  .cl-userButtonPopoverActionButton:hover {
+    background-color: #1e1e23 !important;
+  }
+  .cl-userButtonPopoverActionButtonText {
+    color: #c0c0cc !important;
+    font-size: 13px !important;
+  }
+  .cl-userButtonPopoverActionButtonIcon {
+    color: #808090 !important;
+  }
+
+  /* "Manage account" / "Sign out" list */
+  .cl-userPreviewMainIdentifier {
+    color: #f0f0f4 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+  }
+  .cl-userPreviewSecondaryIdentifier {
+    color: #808090 !important;
+    font-size: 12px !important;
+  }
+
+  /* Divider lines inside popup */
+  .cl-userButtonPopoverCard hr,
+  .cl-userButtonPopoverCard [class*="divider"] {
+    border-color: #2a2a30 !important;
+  }
+
+  /* Footer inside popup — hide Clerk branding */
+  .cl-userButtonPopoverFooter {
+    display: none !important;
+  }
+}
