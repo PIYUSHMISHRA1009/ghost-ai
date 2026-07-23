@@ -263,6 +263,7 @@ export function ProjectSidebar({
       )}
 
       <aside
+        inert={!isOpen ? true : undefined}
         aria-hidden={!isOpen}
         aria-label="Projects"
         className={cn(

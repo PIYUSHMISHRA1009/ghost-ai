@@ -46,12 +46,19 @@ export async function PATCH(
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
   }
 
-  const updated = await prisma.project.update({
-    where: { id: projectId },
-    data: { name },
-  });
+  try {
+    const updated = await prisma.project.update({
+      where: { id: projectId },
+      data: { name },
+    });
 
-  return NextResponse.json(updated);
+    return NextResponse.json(updated);
+  } catch (error) {
+    if ((error as { code?: string })?.code === "P2025") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    throw error;
+  }
 }
 
 export async function DELETE(
@@ -82,9 +89,16 @@ export async function DELETE(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  await prisma.project.delete({
-    where: { id: projectId },
-  });
+  try {
+    await prisma.project.delete({
+      where: { id: projectId },
+    });
 
-  return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    if ((error as { code?: string })?.code === "P2025") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    throw error;
+  }
 }

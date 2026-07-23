@@ -42,9 +42,9 @@ Update this file whenever the current phase, active feature, or implementation s
 ### 06 — Project CRUD API & Persistence
 
 - **`GET /api/projects`**: Lists projects owned by the authenticated Clerk user (`ownerId`), ordered by `updatedAt` descending. Returns `401 Unauthorized` if unauthenticated.
-- **`POST /api/projects`**: Creates a project for the authenticated user (`ownerId`). Defaults missing or empty project name to `"Untitled Project"`. Uses the default CUID strategy from Prisma schema. Returns `401` if unauthenticated.
-- **`PATCH /api/projects/[projectId]`**: Renames a project. Enforces ownership check (`project.ownerId === userId`) returning `403 Forbidden` for non-owners, `404 Not Found` if missing, and `400 Bad Request` if `name` is empty. Returns `401` if unauthenticated.
-- **`DELETE /api/projects/[projectId]`**: Deletes a project. Enforces ownership check (`project.ownerId === userId`) returning `403 Forbidden` for non-owners and `404 Not Found` if missing. Returns `401` if unauthenticated.
+- **`POST /api/projects`**: Creates a project for the authenticated user (`ownerId`). Defaults missing or empty project name to `"Untitled Project"`. Validates client-supplied `rawId` for expected CUID format and length (`/^c[a-z0-9]{24,31}$/i`), falling back to Prisma `@default(cuid())` if invalid or omitted. Wraps `prisma.project.create` in `try/catch` to handle Prisma `P2002` unique constraint collisions gracefully with a `409` conflict response. Returns `401` if unauthenticated.
+- **`PATCH /api/projects/[projectId]`**: Renames a project. Enforces ownership check (`project.ownerId === userId`) returning `403 Forbidden` for non-owners, `404 Not Found` if missing, and `400 Bad Request` if `name` is empty. Wraps `prisma.project.update` in `try/catch` to handle Prisma `P2025` error gracefully with a `404` response during concurrent deletions. Returns `401` if unauthenticated.
+- **`DELETE /api/projects/[projectId]`**: Deletes a project. Enforces ownership check (`project.ownerId === userId`) returning `403 Forbidden` for non-owners and `404 Not Found` if missing. Wraps `prisma.project.delete` in `try/catch` to handle Prisma `P2025` error gracefully with a `404` response during concurrent deletions. Returns `401` if unauthenticated.
 - **`lib/prisma.ts`**: Re-exports `Project`, `ProjectCollaborator`, `ProjectStatus` types for clean type safety across API handlers.
 - **Verification**: `npx tsc --noEmit`, `npx eslint`, and `npm run build` all pass cleanly with 0 errors.
 
@@ -95,6 +95,6 @@ Update this file whenever the current phase, active feature, or implementation s
 ## Architecture Decisions
 
 - shadcn/ui uses the Radix Nova preset with a dark-only token theme defined in `app/globals.css`.
-- Editor chrome owns sidebar visibility in the client page; the sidebar floats above the canvas rather than shifting it.
+- Editor chrome owns sidebar visibility in the client page; app/editor/page.tsx shifts the canvas with marginLeft when the sidebar is open, rather than floating above the canvas.
 - Project dialogs are driven by a single `useProjectDialogs` hook at the page level; dialog components are purely presentational.
 - Mock project data lives in `project-sidebar.tsx` until API layer is added.

@@ -6,6 +6,7 @@ import { EditorNavbar } from "@/components/editor/editor-navbar";
 import { ProjectSidebar } from "@/components/editor/project-sidebar";
 import { ProjectDialogs } from "@/components/editor/project-dialogs";
 import { useProjectActions } from "@/hooks/use-project-actions";
+import { cn } from "@/lib/utils";
 import type { Project } from "@/lib/prisma";
 
 interface EditorHomeClientProps {
@@ -46,15 +47,17 @@ export function EditorHomeClient({
         onDelete={actions.openDelete}
       />
 
-      {/* Canvas area — shifts right when sidebar is open */}
+      {/* Canvas area — shifts right when sidebar is open on sm+ screens */}
       <main
+        className={cn(
+          "transition-[margin-left] duration-200 ease-out",
+          isSidebarOpen ? "sm:ml-[200px]" : "ml-0"
+        )}
         style={{
           marginTop: 56, // below fixed navbar
-          marginLeft: isSidebarOpen ? 200 : 0,
           flex: 1,
           minHeight: "calc(100vh - 56px)",
           backgroundColor: "#000000",
-          transition: "margin-left 0.2s ease-out",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

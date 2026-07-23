@@ -39,14 +39,23 @@ export async function POST(
   const name = rawName || "Untitled Project";
   const description = typeof body?.description === "string" ? body.description.trim() || undefined : undefined;
 
-  const project = await prisma.project.create({
-    data: {
-      ...(rawId ? { id: rawId } : {}),
-      ownerId: userId,
-      name,
-      description,
-    },
-  });
+  const validId = rawId && /^c[a-z0-9]{24,31}$/i.test(rawId) ? rawId : undefined;
 
-  return NextResponse.json(project, { status: 201 });
+  try {
+    const project = await prisma.project.create({
+      data: {
+        ...(validId ? { id: validId } : {}),
+        ownerId: userId,
+        name,
+        description,
+      },
+    });
+
+    return NextResponse.json(project, { status: 201 });
+  } catch (error) {
+    if ((error as { code?: string })?.code === "P2002") {
+      return NextResponse.json({ error: "Project already exists" }, { status: 409 });
+    }
+    throw error;
+  }
 }

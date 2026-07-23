@@ -83,7 +83,7 @@ export function EditorNavbar({
                 rootBox:
                   "flex items-center",
                 userButtonTrigger:
-                  "focus:shadow-none focus-visible:ring-0 outline-none rounded-full",
+                  "focus:shadow-none focus-visible:ring-2 focus-visible:ring-[#00c8d4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#111114] outline-none rounded-full",
                 avatarBox:
                   "h-[34px] w-[34px] rounded-full ring-2 ring-white/10 hover:ring-white/25 transition-all",
                 userButtonPopoverCard:
