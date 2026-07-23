@@ -3,7 +3,7 @@
 import { useEffect, useRef, forwardRef } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { X, FolderPlus } from "lucide-react";
-import type { ProjectDialogsHook } from "@/hooks/use-project-dialogs";
+import type { ProjectActionsHook as ProjectDialogsHook } from "@/hooks/use-project-actions";
 
 interface ProjectDialogsProps {
   hook: ProjectDialogsHook;
@@ -212,10 +212,11 @@ function DestructiveButton({
 }
 
 // Ghost cancel button
-function CancelButton({ onClose }: { onClose: () => void }) {
+function CancelButton({ onClose, disabled }: { onClose: () => void; disabled?: boolean }) {
   return (
     <button
       type="button"
+      disabled={disabled}
       onClick={onClose}
       style={{
         display: "inline-flex",
@@ -230,24 +231,48 @@ function CancelButton({ onClose }: { onClose: () => void }) {
         fontSize: 13,
         fontWeight: 500,
         fontFamily: "var(--font-geist-sans)",
-        cursor: "pointer",
+        cursor: disabled ? "not-allowed" : "pointer",
         transition: "background 0.12s, color 0.12s, border-color 0.12s",
+        opacity: disabled ? 0.5 : 1,
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-          "#1e1e23";
-        (e.currentTarget as HTMLButtonElement).style.color = "#c0c0cc";
-        (e.currentTarget as HTMLButtonElement).style.borderColor = "#3a3a42";
+        if (!disabled) {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+            "#1e1e23";
+          (e.currentTarget as HTMLButtonElement).style.color = "#c0c0cc";
+          (e.currentTarget as HTMLButtonElement).style.borderColor = "#3a3a42";
+        }
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-          "transparent";
-        (e.currentTarget as HTMLButtonElement).style.color = "#808090";
-        (e.currentTarget as HTMLButtonElement).style.borderColor = "#2a2a30";
+        if (!disabled) {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+            "transparent";
+          (e.currentTarget as HTMLButtonElement).style.color = "#808090";
+          (e.currentTarget as HTMLButtonElement).style.borderColor = "#2a2a30";
+        }
       }}
     >
       Cancel
     </button>
+  );
+}
+
+// Error Banner component
+function ErrorBanner({ message }: { message: string }) {
+  return (
+    <div
+      style={{
+        marginBottom: 12,
+        padding: "8px 12px",
+        borderRadius: 8,
+        backgroundColor: "rgba(255,77,79,0.1)",
+        border: "1px solid rgba(255,77,79,0.2)",
+        color: "#ff4d4f",
+        fontSize: 12,
+      }}
+    >
+      {message}
+    </div>
   );
 }
 
@@ -257,7 +282,7 @@ function CreateProjectDialog({ hook }: { hook: ProjectDialogsHook }) {
   const isOpen = hook.dialogState.kind === "create";
 
   return (
-    <DialogPrimitive.Root open={isOpen} onOpenChange={(open) => !open && hook.close()}>
+    <DialogPrimitive.Root open={isOpen} onOpenChange={(open) => !open && !hook.isLoading && hook.close()}>
       <DialogPrimitive.Portal>
         <Overlay />
         <DialogPrimitive.Content style={CARD_STYLE} aria-describedby="create-desc">
@@ -306,6 +331,8 @@ function CreateProjectDialog({ hook }: { hook: ProjectDialogsHook }) {
             </DialogPrimitive.Description>
           </div>
 
+          {hook.error && <ErrorBanner message={hook.error} />}
+
           {/* Input section */}
           <div style={{ marginBottom: 6 }}>
             <label
@@ -325,16 +352,17 @@ function CreateProjectDialog({ hook }: { hook: ProjectDialogsHook }) {
               id="create-project-name"
               placeholder="e.g. E-commerce Platform"
               value={hook.name}
+              disabled={hook.isLoading}
               autoFocus
               onChange={(e) => hook.setName(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && hook.name.trim()) {
-                  hook.close();
+                if (e.key === "Enter" && hook.name.trim() && !hook.isLoading) {
+                  hook.handleCreate();
                 }
               }}
             />
 
-            {/* Live slug preview */}
+            {/* Room ID preview */}
             <div
               style={{
                 marginTop: 10,
@@ -344,35 +372,20 @@ function CreateProjectDialog({ hook }: { hook: ProjectDialogsHook }) {
                 gap: 6,
               }}
             >
-              {hook.slug ? (
-                <>
-                  <span style={{ fontSize: 11, color: "#505060" }}>Slug</span>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: "#505060",
-                    }}
-                  >
-                    /
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: "#00c8d4",
-                      fontFamily: "var(--font-geist-mono)",
-                      backgroundColor: "rgba(0,200,212,0.08)",
-                      padding: "2px 8px",
-                      borderRadius: 5,
-                    }}
-                  >
-                    {hook.slug}
-                  </span>
-                </>
-              ) : (
-                <span style={{ fontSize: 11, color: "#2a2a30" }}>
-                  Slug will appear here
-                </span>
-              )}
+              <span style={{ fontSize: 11, color: "#505060" }}>Room ID</span>
+              <span style={{ fontSize: 11, color: "#505060" }}>/</span>
+              <span
+                style={{
+                  fontSize: 11,
+                  color: "#00c8d4",
+                  fontFamily: "var(--font-geist-mono)",
+                  backgroundColor: "rgba(0,200,212,0.08)",
+                  padding: "2px 8px",
+                  borderRadius: 5,
+                }}
+              >
+                {hook.roomId || hook.suffix}
+              </span>
             </div>
           </div>
 
@@ -387,12 +400,12 @@ function CreateProjectDialog({ hook }: { hook: ProjectDialogsHook }) {
               borderTop: "1px solid #1e1e23",
             }}
           >
-            <CancelButton onClose={hook.close} />
+            <CancelButton onClose={hook.close} disabled={hook.isLoading} />
             <PrimaryButton
               disabled={!hook.name.trim() || hook.isLoading}
-              onClick={hook.close}
+              onClick={hook.handleCreate}
             >
-              Create project
+              {hook.isLoading ? "Creating..." : "Create project"}
             </PrimaryButton>
           </div>
         </DialogPrimitive.Content>
@@ -415,8 +428,10 @@ function RenameProjectDialog({ hook }: { hook: ProjectDialogsHook }) {
     }
   }, [isOpen]);
 
+  const isUnchanged = hook.name.trim() === currentName;
+
   return (
-    <DialogPrimitive.Root open={isOpen} onOpenChange={(open) => !open && hook.close()}>
+    <DialogPrimitive.Root open={isOpen} onOpenChange={(open) => !open && !hook.isLoading && hook.close()}>
       <DialogPrimitive.Portal>
         <Overlay />
         <DialogPrimitive.Content style={CARD_STYLE} aria-describedby="rename-desc">
@@ -451,6 +466,8 @@ function RenameProjectDialog({ hook }: { hook: ProjectDialogsHook }) {
             </DialogPrimitive.Description>
           </div>
 
+          {hook.error && <ErrorBanner message={hook.error} />}
+
           <div style={{ marginBottom: 4 }}>
             <label
               htmlFor="rename-project-name"
@@ -468,10 +485,11 @@ function RenameProjectDialog({ hook }: { hook: ProjectDialogsHook }) {
               id="rename-project-name"
               ref={inputRef}
               value={hook.name}
+              disabled={hook.isLoading}
               onChange={(e) => hook.setName(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && hook.name.trim()) {
-                  hook.close();
+                if (e.key === "Enter" && hook.name.trim() && !isUnchanged && !hook.isLoading) {
+                  hook.handleRename();
                 }
               }}
             />
@@ -487,12 +505,12 @@ function RenameProjectDialog({ hook }: { hook: ProjectDialogsHook }) {
               borderTop: "1px solid #1e1e23",
             }}
           >
-            <CancelButton onClose={hook.close} />
+            <CancelButton onClose={hook.close} disabled={hook.isLoading} />
             <PrimaryButton
-              disabled={!hook.name.trim() || hook.isLoading}
-              onClick={hook.close}
+              disabled={!hook.name.trim() || isUnchanged || hook.isLoading}
+              onClick={hook.handleRename}
             >
-              Save
+              {hook.isLoading ? "Saving..." : "Save"}
             </PrimaryButton>
           </div>
         </DialogPrimitive.Content>
@@ -508,7 +526,7 @@ function DeleteProjectDialog({ hook }: { hook: ProjectDialogsHook }) {
   const targetName = hook.dialogState.target?.name ?? "this project";
 
   return (
-    <DialogPrimitive.Root open={isOpen} onOpenChange={(open) => !open && hook.close()}>
+    <DialogPrimitive.Root open={isOpen} onOpenChange={(open) => !open && !hook.isLoading && hook.close()}>
       <DialogPrimitive.Portal>
         <Overlay />
         <DialogPrimitive.Content style={CARD_STYLE} aria-describedby="delete-desc">
@@ -574,6 +592,8 @@ function DeleteProjectDialog({ hook }: { hook: ProjectDialogsHook }) {
             </DialogPrimitive.Description>
           </div>
 
+          {hook.error && <ErrorBanner message={hook.error} />}
+
           <div
             style={{
               display: "flex",
@@ -584,9 +604,9 @@ function DeleteProjectDialog({ hook }: { hook: ProjectDialogsHook }) {
               borderTop: "1px solid #1e1e23",
             }}
           >
-            <CancelButton onClose={hook.close} />
-            <DestructiveButton disabled={hook.isLoading} onClick={hook.close}>
-              Delete project
+            <CancelButton onClose={hook.close} disabled={hook.isLoading} />
+            <DestructiveButton disabled={hook.isLoading} onClick={hook.handleDelete}>
+              {hook.isLoading ? "Deleting..." : "Delete project"}
             </DestructiveButton>
           </div>
         </DialogPrimitive.Content>

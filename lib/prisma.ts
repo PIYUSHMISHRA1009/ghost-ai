@@ -1,6 +1,8 @@
 import { PrismaClient } from "@/app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
+export type { Project, ProjectCollaborator, ProjectStatus } from "@/app/generated/prisma/client";
+
 // ─── Accelerate (prisma+postgres://) ─────────────────────────────────────────
 
 function createAccelerateClient(): PrismaClient {

@@ -1,33 +1,20 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, X, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ProjectDialogTarget } from "@/hooks/use-project-dialogs";
-
-// ─── Mock data ────────────────────────────────────────────────────────────────
-
-interface MockProject {
-  id: string;
-  name: string;
-  owned: boolean;
-}
-
-const MY_PROJECTS: MockProject[] = [
-  { id: "proj-1", name: "E-commerce Platform", owned: true },
-  { id: "proj-2", name: "Auth Service", owned: true },
-  { id: "proj-3", name: "Notification Pipeline", owned: true },
-];
-
-const SHARED_PROJECTS: MockProject[] = [
-  { id: "proj-4", name: "Analytics Dashboard", owned: false },
-];
+import type { Project } from "@/lib/prisma";
+import type { ProjectDialogTarget } from "@/hooks/use-project-actions";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ProjectSidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  ownedProjects?: Project[];
+  sharedProjects?: Project[];
+  activeProjectId?: string;
   onNewProject: () => void;
   onRename: (project: ProjectDialogTarget) => void;
   onDelete: (project: ProjectDialogTarget) => void;
@@ -39,7 +26,7 @@ type Tab = "my-projects" | "shared";
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="flex flex-1 items-center justify-center">
+    <div className="flex flex-1 items-center justify-center py-8">
       <p style={{ fontSize: 13, color: "#505060", textAlign: "center" }}>
         {message}
       </p>
@@ -48,12 +35,21 @@ function EmptyState({ message }: { message: string }) {
 }
 
 interface ProjectItemProps {
-  project: MockProject;
+  project: Project;
+  isOwned: boolean;
+  isActive: boolean;
   onRename: (project: ProjectDialogTarget) => void;
   onDelete: (project: ProjectDialogTarget) => void;
 }
 
-function ProjectItem({ project, onRename, onDelete }: ProjectItemProps) {
+function ProjectItem({
+  project,
+  isOwned,
+  isActive,
+  onRename,
+  onDelete,
+}: ProjectItemProps) {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -69,23 +65,34 @@ function ProjectItem({ project, onRename, onDelete }: ProjectItemProps) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [menuOpen]);
 
+  const handleSelect = () => {
+    router.push(`/editor/${project.id}`);
+  };
+
   return (
     <div
+      onClick={handleSelect}
       className="group relative flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer"
-      style={{ transition: "background 0.12s" }}
-      onMouseEnter={(e) =>
-        ((e.currentTarget as HTMLDivElement).style.background = "#1e1e23")
-      }
-      onMouseLeave={(e) =>
-        ((e.currentTarget as HTMLDivElement).style.background = "transparent")
-      }
+      style={{
+        transition: "background 0.12s",
+        backgroundColor: isActive ? "#1e1e23" : "transparent",
+      }}
+      onMouseEnter={(e) => {
+        if (!isActive)
+          (e.currentTarget as HTMLDivElement).style.background = "#1e1e23";
+      }}
+      onMouseLeave={(e) => {
+        if (!isActive)
+          (e.currentTarget as HTMLDivElement).style.background = "transparent";
+      }}
     >
       {/* Project name */}
       <span
         style={{
           flex: 1,
           fontSize: 13,
-          color: "#c0c0cc",
+          color: isActive ? "#f0f0f4" : "#c0c0cc",
+          fontWeight: isActive ? 500 : 400,
           overflow: "hidden",
           whiteSpace: "nowrap",
           textOverflow: "ellipsis",
@@ -96,7 +103,7 @@ function ProjectItem({ project, onRename, onDelete }: ProjectItemProps) {
       </span>
 
       {/* Context menu button — owned projects only */}
-      {project.owned && (
+      {isOwned && (
         <div ref={menuRef} style={{ position: "relative", flexShrink: 0 }}>
           <button
             aria-label={`Actions for ${project.name}`}
@@ -225,6 +232,9 @@ function ProjectItem({ project, onRename, onDelete }: ProjectItemProps) {
 export function ProjectSidebar({
   isOpen,
   onClose,
+  ownedProjects = [],
+  sharedProjects = [],
+  activeProjectId,
   onNewProject,
   onRename,
   onDelete,
@@ -232,7 +242,8 @@ export function ProjectSidebar({
   const [activeTab, setActiveTab] = useState<Tab>("my-projects");
 
   const projects =
-    activeTab === "my-projects" ? MY_PROJECTS : SHARED_PROJECTS;
+    activeTab === "my-projects" ? ownedProjects : sharedProjects;
+  const isOwnedTab = activeTab === "my-projects";
 
   return (
     <>
@@ -370,6 +381,8 @@ export function ProjectSidebar({
               <ProjectItem
                 key={project.id}
                 project={project}
+                isOwned={isOwnedTab}
+                isActive={project.id === activeProjectId}
                 onRename={onRename}
                 onDelete={onDelete}
               />

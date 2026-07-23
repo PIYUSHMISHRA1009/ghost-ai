@@ -17,12 +17,38 @@ Update this file whenever the current phase, active feature, or implementation s
 - 03 — Authentication
 - 04 — Project dialogs & editor home
 - 05 — Prisma schema and data layer
+- 06 — Project CRUD API & persistence
+- 07 — Project UI Wiring & Persistence
 
 ## In Progress
 
-- 06 — Project CRUD API & Persistence
+- 08 — Editor workspace shell
 
 ## Recently Completed
+
+### 07 — Project UI Wiring & Persistence
+
+- **`lib/projects.ts`**: Added `getProjectsForUser(userId, userEmails)` server-side data fetching helper querying owned and shared projects ordered by `updatedAt` descending.
+- **`app/api/projects/route.ts`**: Updated `POST /api/projects` endpoint to accept optional `id` parameter in body so project ID and Liveblocks room ID stay 100% aligned.
+- **`hooks/use-project-actions.ts`**: Created unified custom hook managing dialog states (`create`, `rename`, `delete`) and project mutations:
+  - **Create**: generates short unique suffix, slugifies name, forms `roomId`, calls `POST /api/projects`, navigates to `/editor/${project.id}`.
+  - **Rename**: stores target project ID & name, calls `PATCH /api/projects/[id]`, calls `router.refresh()` on success.
+  - **Delete**: stores target project, calls `DELETE /api/projects/[id]`, redirects to `/editor` if active workspace is deleted, otherwise calls `router.refresh()`.
+- **`components/editor/project-dialogs.tsx`**: Connected dialog forms, inputs, and buttons to `useProjectActions` handlers; added room ID live preview (`Room ID / {roomId}`), disabled inputs and buttons during mutations, and error alerts.
+- **`components/editor/project-sidebar.tsx`**: Updated to accept real `ownedProjects` and `sharedProjects` arrays (`Project[]`), wired project items to navigate to workspace `/editor/${project.id}`, and wired context menu options to rename/delete hooks.
+- **`components/editor/editor-home-client.tsx`**: Created client component wrapper hosting navbar, sidebar, main empty state, and dialogs.
+- **`app/editor/page.tsx`**: Converted `/editor` to a React Server Component fetching owned and shared projects server-side for initial load without client-side fetch latency.
+
+### 06 — Project CRUD API & Persistence
+
+- **`GET /api/projects`**: Lists projects owned by the authenticated Clerk user (`ownerId`), ordered by `updatedAt` descending. Returns `401 Unauthorized` if unauthenticated.
+- **`POST /api/projects`**: Creates a project for the authenticated user (`ownerId`). Defaults missing or empty project name to `"Untitled Project"`. Uses the default CUID strategy from Prisma schema. Returns `401` if unauthenticated.
+- **`PATCH /api/projects/[projectId]`**: Renames a project. Enforces ownership check (`project.ownerId === userId`) returning `403 Forbidden` for non-owners, `404 Not Found` if missing, and `400 Bad Request` if `name` is empty. Returns `401` if unauthenticated.
+- **`DELETE /api/projects/[projectId]`**: Deletes a project. Enforces ownership check (`project.ownerId === userId`) returning `403 Forbidden` for non-owners and `404 Not Found` if missing. Returns `401` if unauthenticated.
+- **`lib/prisma.ts`**: Re-exports `Project`, `ProjectCollaborator`, `ProjectStatus` types for clean type safety across API handlers.
+- **Verification**: `npx tsc --noEmit`, `npx eslint`, and `npm run build` all pass cleanly with 0 errors.
+
+
 
 ### 05 — Prisma Schema And Data Layer
 
