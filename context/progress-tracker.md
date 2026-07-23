@@ -16,12 +16,26 @@ Update this file whenever the current phase, active feature, or implementation s
 - 02 — Editor chrome
 - 03 — Authentication
 - 04 — Project dialogs & editor home
+- 05 — Prisma schema and data layer
 
 ## In Progress
 
-- 05 — Editor canvas / block interactions
+- 06 — Project CRUD API & Persistence
 
 ## Recently Completed
+
+### 05 — Prisma Schema And Data Layer
+
+- **`prisma/models/project.prisma`**: Defined `Project` and `ProjectCollaborator` models:
+  - `Project`: `ownerId`, `name`, optional `description`, `ProjectStatus` enum (`DRAFT`, `ARCHIVED`), `canvasJsonPath`, timestamps, indexes on `ownerId` and `createdAt`.
+  - `ProjectCollaborator`: `projectId` with cascade delete relation, `email`, `createdAt`, unique constraint on `(projectId, email)`, indexes on `email` and `(projectId, createdAt)`.
+- **`lib/prisma.ts`**: Implemented cached Prisma Client singleton:
+  - Dynamically branches based on `DATABASE_URL`: uses Accelerate extension for `prisma+postgres://` URLs, otherwise instantiates `@prisma/adapter-pg` with `PrismaPg`.
+  - Caches client instance on `globalThis` in development for HMR safety.
+- **Migration & Client Generation**: Created and ran migration `20260723120910_init_project_models` against PostgreSQL database and generated Prisma Client to `./app/generated/prisma`.
+- Verification: `npx tsc --noEmit` and `npm run build` both passed cleanly with 0 errors.
+
+
 
 ### 04 — Project Dialogs & Editor Home
 
