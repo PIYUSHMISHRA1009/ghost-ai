@@ -105,7 +105,12 @@ export function CanvasWrapper({ roomId }: CanvasWrapperProps) {
         id={roomId}
         initialPresence={{ cursor: null, isThinking: false }}
       >
-        <ErrorBoundary fallback={<CanvasError />}>
+        <ErrorBoundary
+          fallback={<CanvasError />}
+          onError={(error) => {
+            console.error("Liveblocks room connection error:", error);
+          }}
+        >
           <ClientSideSuspense fallback={<CanvasLoading />}>
             <ReactFlowProvider>
               <CanvasFlow />

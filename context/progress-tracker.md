@@ -24,12 +24,20 @@ Update this file whenever the current phase, active feature, or implementation s
 - 10 — Liveblocks setup
 - 11 — Base canvas
 - 12 — Shape panel & canvas node creation
+- 13 — Node shape rendering & drag preview
 
 ## In Progress
 
-- 13 — Canvas node interactions
+- 14 — Canvas node interactions
 
 ## Recently Completed
+
+### 13 — Node Shape Rendering & Drag Preview
+
+- **`components/editor/canvas-node.tsx`**: Replaced placeholder node rendering with dedicated shape renderers for all 6 variants: CSS shapes for `rectangle` (`rounded-lg`), `pill` (`rounded-full`), and `circle` (`rounded-full`), and SVG shapes for `diamond`, `hexagon`, and `cylinder`. Borders styled with subtle `#3a3a42` at rest and cyan glow `#00c8d4` when selected.
+- **`components/editor/shape-panel.tsx`**: Added HTML5 `setDragImage` ghost preview attached to cursor during drag. Dynamically generates preview matching dragged shape, default dimensions (`width` x `height`), fill color, and border with 75% opacity, automatically cleaning up temporary DOM nodes.
+- **Verification**: `npx tsc --noEmit` and `npm run build` both pass with 0 errors.
+
 
 ### 12 — Shape Panel & Canvas Node Creation
 
@@ -39,10 +47,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - **`components/editor/canvas-wrapper.tsx`**: Wrapped `<CanvasFlow />` inside `<ReactFlowProvider>` so `useReactFlow()` works seamlessly throughout the canvas component tree.
 - **Verification**: `npx tsc --noEmit` and `npm run build` both pass with 0 errors.
 
-
-
-
-### 12 — Inset Canvas & Dual Sidebar Dynamic Layout
+### 13 — Inset Canvas & Dual Sidebar Dynamic Layout
 
 - **`components/editor/workspace-shell-client.tsx`**: Updated canvas container (`main`) layout to use fixed positioning with dynamic `left` (264px when left sidebar open, 12px when closed) and dynamic `right` (304px when AI sidebar open, 12px when closed) with a smooth `0.2s` CSS transition.
 - **`components/editor/editor-home-client.tsx`**: Applied matching dynamic inset canvas panel layout for `/editor` home view.
@@ -50,6 +55,27 @@ Update this file whenever the current phase, active feature, or implementation s
   - When both sidebars are open (Image 1), left sidebar (240px), center canvas panel, and right AI sidebar (280px) sit side-by-side with uniform 12px gaps and 12px top/bottom margins below the 56px navbar.
   - When both sidebars are closed (Image 2), center canvas dynamically expands to fill the viewport maintaining a uniform 12px inset border margin around all edges.
 - **Verification**: `npx tsc --noEmit` passes cleanly with 0 errors.
+
+### 14 — Comprehensive Code & Documentation Review Remediation
+
+- **Layout System (`lib/layout-constants.ts`)**: Centralized `NAVBAR_HEIGHT`, `INSET_GUTTER`, `LEFT_SIDEBAR_WIDTH`, `RIGHT_SIDEBAR_WIDTH`, and derived `CANVAS_TOP_OFFSET` / `CANVAS_BOTTOM_OFFSET` across all editor shell views and sidebars.
+- **Canvas & Flow Architecture (`types/canvas.ts`, `components/editor/canvas-flow.tsx`, `components/editor/canvas-node.tsx`, `components/editor/canvas-wrapper.tsx`, `components/editor/shape-panel.tsx`)**:
+  - Removed `as const` from `NODE_COLORS` / `NODE_SHAPES`.
+  - Replaced collision-prone ID counters with `crypto.randomUUID()`.
+  - Removed duplicate `reactFlowInstance.addNodes` call in `onDrop`.
+  - Cleaned edge types cast.
+  - Merged shape cases in node renderer.
+  - Added `onError` error reporting callback to `<ErrorBoundary>`.
+  - Added viewport center shape creation supporting click and keyboard (Enter/Space).
+- **Backend APIs & Auth (`app/api/projects/[projectId]/collaborators/[collaboratorId]/route.ts`, `app/api/projects/[projectId]/collaborators/route.ts`, `app/sign-in/[[...sign-in]]/page.tsx`, `app/editor/[roomId]/page.tsx`)**:
+  - Scoped collaborator deletion by both `id` and `projectId`.
+  - Extracted reusable `resolveClerkDisplayName` helper for collaborator and owner name resolution.
+  - Updated Clerk `forceRedirectUrl` to `fallbackRedirectUrl` and added `redirect_url` search parameter to unauthenticated sign-in redirects.
+- **UI & Share Dialog (`hooks/use-share-dialog.ts`, `components/editor/share-dialog.tsx`, `components/editor/project-sidebar.tsx`, `components/editor/project-dialogs.tsx`, `components/editor/editor-navbar.tsx`, `components/editor/workspace-shell-client.tsx`)**:
+  - Single derived `shareUrl` passed to dialog for guaranteed URL consistency.
+  - Derived initial `activeTab` from `activeProjectId` and `sharedProjects`.
+  - Replaced imperative JS style mutations with Tailwind hover and focus utility classes.
+- **Documentation & References (`.agents/skills/liveblocks-best-practices/`)**: Corrected typos, code fences, rules of hooks violations, missing async/await, Lexical editor type & format dispatch commands (`FORMAT_TEXT_COMMAND`), and type annotations across reference docs and skill definition.
 
 ### 10 — Liveblocks Setup
 

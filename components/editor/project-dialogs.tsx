@@ -49,30 +49,7 @@ function CloseButton({ onClose }: CloseButtonProps) {
     <button
       aria-label="Close dialog"
       onClick={onClose}
-      style={{
-        position: "absolute",
-        top: 16,
-        right: 16,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: 28,
-        height: 28,
-        borderRadius: 8,
-        border: "1px solid #2a2a30",
-        background: "#18181c",
-        color: "#505060",
-        cursor: "pointer",
-        transition: "background 0.12s, color 0.12s",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = "#2a2a30";
-        (e.currentTarget as HTMLButtonElement).style.color = "#c0c0cc";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = "#18181c";
-        (e.currentTarget as HTMLButtonElement).style.color = "#505060";
-      }}
+      className="absolute top-4 right-4 flex items-center justify-center w-7 h-7 rounded-lg border border-[#2a2a30] bg-[#18181c] text-[#505060] hover:bg-[#2a2a30] hover:text-[#c0c0cc] cursor-pointer transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[#00c8d4]"
     >
       <X style={{ width: 13, height: 13 }} />
     </button>
@@ -86,31 +63,8 @@ const StyledInput = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLI
       <input
         ref={ref}
         {...props}
-        style={{
-          width: "100%",
-          height: 40,
-          padding: "0 12px",
-          borderRadius: 8,
-          border: "1px solid #2a2a30",
-          backgroundColor: "#0c0c0f",
-          color: "#f0f0f4",
-          fontSize: 14,
-          fontFamily: "var(--font-geist-sans)",
-          outline: "none",
-          transition: "border-color 0.15s, box-shadow 0.15s",
-          boxSizing: "border-box",
-          ...props.style,
-        }}
-        onFocus={(e) => {
-          e.currentTarget.style.borderColor = "#00c8d4";
-          e.currentTarget.style.boxShadow = "0 0 0 3px rgba(0,200,212,0.12)";
-          props.onFocus?.(e);
-        }}
-        onBlur={(e) => {
-          e.currentTarget.style.borderColor = "#2a2a30";
-          e.currentTarget.style.boxShadow = "none";
-          props.onBlur?.(e);
-        }}
+        className={`w-full h-10 px-3 rounded-lg border border-[#2a2a30] bg-[#0c0c0f] text-[#f0f0f4] text-sm font-sans outline-none transition-all focus:border-[#00c8d4] focus:ring-2 focus:ring-[#00c8d4]/20 box-border ${props.className || ""}`}
+        style={props.style}
       />
     );
   }
@@ -131,32 +85,11 @@ function PrimaryButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: 36,
-        padding: "0 18px",
-        borderRadius: 8,
-        border: "none",
-        backgroundColor: disabled ? "#1e1e23" : "#00c8d4",
-        color: disabled ? "#505060" : "#000",
-        fontSize: 13,
-        fontWeight: 600,
-        fontFamily: "var(--font-geist-sans)",
-        cursor: disabled ? "not-allowed" : "pointer",
-        transition: "background 0.15s",
-      }}
-      onMouseEnter={(e) => {
-        if (!disabled)
-          (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-            "#00b5c0";
-      }}
-      onMouseLeave={(e) => {
-        if (!disabled)
-          (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-            "#00c8d4";
-      }}
+      className={`inline-flex items-center justify-center h-9 px-4 rounded-lg border-0 font-sans text-[13px] font-semibold transition-colors ${
+        disabled
+          ? "bg-[#1e1e23] text-[#505060] cursor-not-allowed"
+          : "bg-[#00c8d4] hover:bg-[#00b5c0] active:bg-[#00a8b4] text-black cursor-pointer"
+      }`}
     >
       {children}
     </button>
@@ -178,33 +111,11 @@ function DestructiveButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: 36,
-        padding: "0 18px",
-        borderRadius: 8,
-        border: "none",
-        backgroundColor: "#ff4d4f",
-        color: "#fff",
-        fontSize: 13,
-        fontWeight: 600,
-        fontFamily: "var(--font-geist-sans)",
-        cursor: disabled ? "not-allowed" : "pointer",
-        transition: "background 0.15s",
-        opacity: disabled ? 0.5 : 1,
-      }}
-      onMouseEnter={(e) => {
-        if (!disabled)
-          (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-            "#e53e3f";
-      }}
-      onMouseLeave={(e) => {
-        if (!disabled)
-          (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-            "#ff4d4f";
-      }}
+      className={`inline-flex items-center justify-center h-9 px-4 rounded-lg border-0 font-sans text-[13px] font-semibold transition-colors ${
+        disabled
+          ? "bg-[#ff4d4f]/50 text-white/50 cursor-not-allowed"
+          : "bg-[#ff4d4f] hover:bg-[#e53e3f] active:bg-[#d43839] text-white cursor-pointer"
+      }`}
     >
       {children}
     </button>
@@ -212,47 +123,19 @@ function DestructiveButton({
 }
 
 // Ghost cancel button
-function CancelButton({ onClose, disabled }: { onClose: () => void; disabled?: boolean }) {
+function CancelButton({ onClose, disabled, children }: { onClose: () => void; disabled?: boolean; children?: React.ReactNode }) {
   return (
     <button
       type="button"
       disabled={disabled}
       onClick={onClose}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: 36,
-        padding: "0 16px",
-        borderRadius: 8,
-        border: "1px solid #2a2a30",
-        backgroundColor: "transparent",
-        color: "#808090",
-        fontSize: 13,
-        fontWeight: 500,
-        fontFamily: "var(--font-geist-sans)",
-        cursor: disabled ? "not-allowed" : "pointer",
-        transition: "background 0.12s, color 0.12s, border-color 0.12s",
-        opacity: disabled ? 0.5 : 1,
-      }}
-      onMouseEnter={(e) => {
-        if (!disabled) {
-          (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-            "#1e1e23";
-          (e.currentTarget as HTMLButtonElement).style.color = "#c0c0cc";
-          (e.currentTarget as HTMLButtonElement).style.borderColor = "#3a3a42";
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!disabled) {
-          (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-            "transparent";
-          (e.currentTarget as HTMLButtonElement).style.color = "#808090";
-          (e.currentTarget as HTMLButtonElement).style.borderColor = "#2a2a30";
-        }
-      }}
+      className={`inline-flex items-center justify-center h-9 px-4 rounded-lg border border-[#2a2a30] font-sans text-[13px] font-medium transition-colors ${
+        disabled
+          ? "bg-transparent text-[#808090]/50 border-[#2a2a30]/50 cursor-not-allowed"
+          : "bg-transparent hover:bg-[#1e1e23] text-[#808090] hover:text-[#c0c0cc] hover:border-[#3a3a42] cursor-pointer"
+      }`}
     >
-      Cancel
+      {children || "Cancel"}
     </button>
   );
 }

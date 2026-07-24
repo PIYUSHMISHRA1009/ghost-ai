@@ -10,6 +10,15 @@ interface InviteBody {
   email?: string;
 }
 
+function resolveClerkDisplayName(
+  user: { firstName?: string | null; lastName?: string | null; username?: string | null } | null | undefined,
+  fallback: string
+): string {
+  if (!user) return fallback;
+  const fullName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim();
+  return fullName || user.username || fallback;
+}
+
 export async function GET(
   _request: NextRequest,
   { params }: RouteContext
@@ -64,11 +73,7 @@ export async function GET(
     ownerUser?.primaryEmailAddress?.emailAddress ??
     ownerUser?.emailAddresses?.[0]?.emailAddress ??
     "";
-  const ownerName = ownerUser
-    ? `${ownerUser.firstName ?? ""} ${ownerUser.lastName ?? ""}`.trim() ||
-      ownerUser.username ||
-      ownerEmail
-    : "Project Owner";
+  const ownerName = resolveClerkDisplayName(ownerUser, ownerEmail || "Project Owner");
   const ownerAvatarUrl = ownerUser?.imageUrl ?? null;
 
   // 2. Fetch Collaborators Clerk Profiles
@@ -98,11 +103,7 @@ export async function GET(
 
   const collaborators = project.collaborators.map((c) => {
     const clerkUser = clerkUsersMap.get(c.email.toLowerCase());
-    const name = clerkUser
-      ? `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() ||
-        clerkUser.username ||
-        c.email
-      : null;
+    const name = clerkUser ? resolveClerkDisplayName(clerkUser, c.email) : null;
     const avatarUrl = clerkUser?.imageUrl ?? null;
 
     return {
@@ -197,10 +198,7 @@ export async function POST(
       });
       const clerkUser = usersResponse.data?.[0];
       if (clerkUser) {
-        name =
-          `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() ||
-          clerkUser.username ||
-          email;
+        name = resolveClerkDisplayName(clerkUser, email);
         avatarUrl = clerkUser.imageUrl;
       }
     } catch {

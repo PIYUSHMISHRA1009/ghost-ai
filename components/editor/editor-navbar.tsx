@@ -3,6 +3,7 @@
 import { PanelLeftClose, PanelLeftOpen, Share2, Sparkles } from "lucide-react";
 import { SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import { NAVBAR_HEIGHT } from "@/lib/layout-constants";
 
 interface EditorNavbarProps {
   isSidebarOpen: boolean;
@@ -30,7 +31,7 @@ export function EditorNavbar({
         top: 0,
         left: 0,
         right: 0,
-        height: 56,
+        height: NAVBAR_HEIGHT,
         zIndex: 30,
         display: "flex",
         alignItems: "center",
@@ -43,27 +44,7 @@ export function EditorNavbar({
         <button
           aria-label={isSidebarOpen ? "Close projects sidebar" : "Open projects sidebar"}
           onClick={onSidebarToggle}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            border: "none",
-            background: "transparent",
-            color: "#808090",
-            cursor: "pointer",
-            transition: "background 0.12s, color 0.12s",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = "#1e1e23";
-            (e.currentTarget as HTMLButtonElement).style.color = "#c0c0cc";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-            (e.currentTarget as HTMLButtonElement).style.color = "#808090";
-          }}
+          className="flex items-center justify-center w-8 h-8 rounded-lg text-[#808090] hover:text-[#c0c0cc] hover:bg-[#1e1e23] active:bg-[#18181c] focus-visible:ring-2 focus-visible:ring-[#00c8d4] outline-none transition-colors cursor-pointer bg-transparent border-0"
         >
           <SidebarIcon style={{ width: 18, height: 18 }} />
         </button>
@@ -120,30 +101,7 @@ export function EditorNavbar({
         {onShare && (
           <button
             onClick={onShare}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              height: 32,
-              padding: "0 14px",
-              borderRadius: 8,
-              border: "1px solid #2a2a30",
-              backgroundColor: "#18181c",
-              color: "#c0c0cc",
-              fontSize: 12,
-              fontWeight: 500,
-              cursor: "pointer",
-              transition: "background 0.12s, border-color 0.12s",
-              fontFamily: "var(--font-geist-sans)",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1e1e23";
-              (e.currentTarget as HTMLButtonElement).style.borderColor = "#3a3a42";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#18181c";
-              (e.currentTarget as HTMLButtonElement).style.borderColor = "#2a2a30";
-            }}
+            className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg border border-[#2a2a30] hover:border-[#3a3a42] bg-[#18181c] hover:bg-[#1e1e23] text-[#c0c0cc] text-[12px] font-medium transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00c8d4]"
           >
             <Share2 style={{ width: 13, height: 13, color: "#00c8d4" }} />
             Share
@@ -155,36 +113,11 @@ export function EditorNavbar({
           <button
             aria-label={isAiSidebarOpen ? "Close AI Assistant" : "Open AI Assistant"}
             onClick={onAiSidebarToggle}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              height: 32,
-              padding: "0 14px",
-              borderRadius: 8,
-              border: isAiSidebarOpen ? "1px solid rgba(100, 87, 249, 0.4)" : "1px solid #2a2a30",
-              backgroundColor: isAiSidebarOpen ? "rgba(100, 87, 249, 0.12)" : "#18181c",
-              color: isAiSidebarOpen ? "#8b82ff" : "#808090",
-              fontSize: 12,
-              fontWeight: 500,
-              cursor: "pointer",
-              transition: "background 0.12s, border-color 0.12s, color 0.12s",
-              fontFamily: "var(--font-geist-sans)",
-            }}
-            onMouseEnter={(e) => {
-              if (!isAiSidebarOpen) {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(100, 87, 249, 0.08)";
-                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(100, 87, 249, 0.3)";
-                (e.currentTarget as HTMLButtonElement).style.color = "#8b82ff";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isAiSidebarOpen) {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#18181c";
-                (e.currentTarget as HTMLButtonElement).style.borderColor = "#2a2a30";
-                (e.currentTarget as HTMLButtonElement).style.color = "#808090";
-              }
-            }}
+            className={`inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg text-[12px] font-medium transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#8b82ff] ${
+              isAiSidebarOpen
+                ? "border border-[rgba(100,87,249,0.4)] bg-[rgba(100,87,249,0.12)] text-[#8b82ff]"
+                : "border border-[#2a2a30] hover:border-[rgba(100,87,249,0.3)] bg-[#18181c] hover:bg-[rgba(100,87,249,0.08)] text-[#808090] hover:text-[#8b82ff]"
+            }`}
           >
             <Sparkles style={{ width: 13, height: 13 }} />
             AI Copilot

@@ -33,7 +33,6 @@ import "@liveblocks/react-flow/styles.css";
 
 import {
   CANVAS_NODE_TYPE,
-  CANVAS_EDGE_TYPE,
   DEFAULT_NODE_COLOR,
   type CanvasNode,
   type CanvasEdge,
@@ -42,15 +41,12 @@ import {
 import { CanvasNodeComponent } from "@/components/editor/canvas-node";
 import { ShapePanel } from "@/components/editor/shape-panel";
 
-// Module-level counter for node ID generation (spec #6)
-let nodeCounter = 0;
-
-// Node / edge type maps
+// Node type map registered with React Flow
 const nodeTypes = {
   [CANVAS_NODE_TYPE]: CanvasNodeComponent,
 };
 
-const edgeTypes = {} as Record<typeof CANVAS_EDGE_TYPE, React.ComponentType>;
+const edgeTypes = {};
 
 export function CanvasFlow() {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onDelete } =
@@ -98,9 +94,8 @@ export function CanvasFlow() {
           y: event.clientY,
         });
 
-        nodeCounter += 1;
         const newNode: CanvasNode = {
-          id: `${shape}_${Date.now()}_${nodeCounter}`,
+          id: `${shape}_${crypto.randomUUID()}`,
           type: CANVAS_NODE_TYPE,
           position: {
             x: position.x - width / 2,
@@ -116,9 +111,8 @@ export function CanvasFlow() {
           style: { width, height },
         };
 
-        // Notify Liveblocks flow sync and React Flow instance
+        // Notify Liveblocks flow sync (Liveblocks Storage controlled state)
         onNodesChange([{ type: "add", item: newNode }]);
-        reactFlowInstance.addNodes(newNode);
       } catch (error) {
         console.error("Error handling canvas shape drop:", error);
       }
@@ -143,7 +137,7 @@ export function CanvasFlow() {
         onDragOver={onDragOver}
         onDrop={onDrop}
         nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes as never}
+        edgeTypes={edgeTypes}
         connectOnClick
         fitView
         style={{ background: "transparent" }}

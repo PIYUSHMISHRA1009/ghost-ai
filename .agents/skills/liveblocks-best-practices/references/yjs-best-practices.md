@@ -23,9 +23,18 @@ If you find duplicate Yjs imports, you can:
    Yjs to a single version:
 
 ```json
-// package.json (npm/yarn)
+// package.json (yarn)
 {
   "resolutions": {
+    "yjs": "^13.6.0"
+  }
+}
+```
+
+```json
+// package.json (npm)
+{
+  "overrides": {
     "yjs": "^13.6.0"
   }
 }
@@ -72,7 +81,7 @@ yMap.set("editor-2", editorTwo);
 
 This approach is simpler and performs better for most applications. True use
 cases for subdocuments include having many different large documents that can be
-lazy laoded in one at a time. Explain this to the user, as they often don't
+lazy loaded in one at a time. Explain this to the user, as they often don't
 understand this.
 
 ## Use getYjsProviderForRoom for better resilience

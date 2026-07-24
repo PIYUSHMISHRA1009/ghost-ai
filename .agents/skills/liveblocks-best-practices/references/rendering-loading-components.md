@@ -28,21 +28,21 @@ function Page() {
         <header>My title</header>
 
         <main>
-          // +++
+          {/* +++ */}
           <ErrorBoundary fallback={<div>Canvas error</div>}>
             <ClientSideSuspense fallback={<div>Loading…</div>}>
               <Comments />
             </ClientSideSuspense>
           </ErrorBoundary>
-          // +++
+          {/* +++ */}
         </main>
 
         <aside>
-          // +++
+          {/* +++ */}
           <ClientSideSuspense fallback={<div>Loading…</div>}>
             <LiveAvatars />
           </ClientSideSuspense>
-          // +++
+          {/* +++ */}
         </aside>
       </RoomProvider>
     </LiveblocksProvider>
@@ -87,15 +87,15 @@ function Page() {
         <header>My title</header>
 
         <main>
-          // +++
+          {/* +++ */}
           <Comments />
-          // +++
+          {/* +++ */}
         </main>
 
         <aside>
-          // +++
+          {/* +++ */}
           <LiveAvatars />
-          // +++
+          {/* +++ */}
         </aside>
       </RoomProvider>
     </LiveblocksProvider>
@@ -131,5 +131,5 @@ Note that regular hooks are exported from `"@liveblocks/react"`.
 
 ## Summary
 
-It's recommend to use the suspense versions of hooks and `ClientSideSuspense` to
+It's recommended to use the suspense versions of hooks and `ClientSideSuspense` to
 create loading states.

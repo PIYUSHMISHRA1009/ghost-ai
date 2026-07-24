@@ -75,7 +75,7 @@ export const NODE_COLORS: NodeColorPair[] = [
   { fill: "#3A1726", text: "#F75F8F", label: "Pink" },
   { fill: "#0F2E18", text: "#62C073", label: "Green" },
   { fill: "#062822", text: "#0AC7B4", label: "Teal" },
-] as const;
+];
 
 /** Default fill color applied when no color is specified. */
 export const DEFAULT_NODE_COLOR = NODE_COLORS[0].fill;
@@ -110,7 +110,7 @@ export const NODE_SHAPES: NodeShape[] = [
   "pill",
   "cylinder",
   "hexagon",
-] as const;
+];
 
 /** Default shape applied when no shape is specified. */
 export const DEFAULT_NODE_SHAPE: NodeShape = "rectangle";

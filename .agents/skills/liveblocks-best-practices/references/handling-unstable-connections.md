@@ -13,6 +13,7 @@ inside of
 [`LiveblocksProvider`](https://liveblocks.io/docs/api-reference/liveblocks-react#LiveblocksProvider).
 
 ```tsx
+import { useLostConnectionListener } from "@liveblocks/react/suspense";
 import { toast } from "my-preferred-toast-library";
 
 function App() {

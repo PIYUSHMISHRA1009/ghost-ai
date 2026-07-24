@@ -7,6 +7,11 @@ import { Plus, X, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/lib/prisma";
 import type { ProjectDialogTarget } from "@/hooks/use-project-actions";
+import {
+  CANVAS_TOP_OFFSET,
+  INSET_GUTTER,
+  LEFT_SIDEBAR_WIDTH,
+} from "@/lib/layout-constants";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -72,28 +77,15 @@ function ProjectItem({
   return (
     <div
       onClick={handleSelect}
-      className="group relative flex items-center gap-2 cursor-pointer transition-colors"
+      className={`group relative flex items-center gap-2 cursor-pointer transition-all ${
+        isActive
+          ? "bg-[rgba(0,200,212,0.12)] border border-[rgba(0,200,212,0.25)]"
+          : "bg-transparent border border-transparent hover:bg-white/[0.03]"
+      }`}
       style={{
         padding: "8px 12px",
         margin: "2px 8px",
         borderRadius: 12,
-        transition: "all 0.15s ease",
-        backgroundColor: isActive
-          ? "rgba(0, 200, 212, 0.12)"
-          : "transparent",
-        border: isActive
-          ? "1px solid rgba(0, 200, 212, 0.25)"
-          : "1px solid transparent",
-      }}
-      onMouseEnter={(e) => {
-        if (!isActive)
-          (e.currentTarget as HTMLDivElement).style.backgroundColor =
-            "rgba(255,255,255,0.03)";
-      }}
-      onMouseLeave={(e) => {
-        if (!isActive)
-          (e.currentTarget as HTMLDivElement).style.backgroundColor =
-            "transparent";
       }}
     >
       {/* Dot */}
@@ -133,29 +125,9 @@ function ProjectItem({
               e.stopPropagation();
               setMenuOpen((prev) => !prev);
             }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 22,
-              height: 22,
-              borderRadius: 5,
-              border: "none",
-              background: "transparent",
-              color: "#505060",
-              cursor: "pointer",
-              padding: 0,
-              opacity: menuOpen ? 1 : undefined,
-            }}
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
-            onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLButtonElement).style.background =
-                "#2a2a30")
-            }
-            onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLButtonElement).style.background =
-                "transparent")
-            }
+            className={`flex items-center justify-center w-[22px] h-[22px] rounded-[5px] border-0 bg-transparent text-[#505060] hover:bg-[#2a2a30] hover:text-[#c0c0cc] cursor-pointer p-0 transition-all ${
+              menuOpen ? "opacity-100 bg-[#2a2a30] text-[#c0c0cc]" : "opacity-0 group-hover:opacity-100"
+            }`}
           >
             <MoreHorizontal style={{ width: 13, height: 13 }} />
           </button>
@@ -181,28 +153,7 @@ function ProjectItem({
                   setMenuOpen(false);
                   onRename({ id: project.id, name: project.name });
                 }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  width: "100%",
-                  padding: "6px 10px",
-                  borderRadius: 7,
-                  border: "none",
-                  background: "transparent",
-                  color: "#c0c0cc",
-                  fontSize: 13,
-                  cursor: "pointer",
-                  textAlign: "left",
-                }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLButtonElement).style.background =
-                    "#1e1e23")
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLButtonElement).style.background =
-                    "transparent")
-                }
+                className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-[7px] border-0 bg-transparent hover:bg-[#1e1e23] text-[#c0c0cc] text-[13px] cursor-pointer text-left transition-colors"
               >
                 <Pencil style={{ width: 12, height: 12, color: "#808090" }} />
                 Rename
@@ -214,28 +165,7 @@ function ProjectItem({
                   setMenuOpen(false);
                   onDelete({ id: project.id, name: project.name });
                 }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  width: "100%",
-                  padding: "6px 10px",
-                  borderRadius: 7,
-                  border: "none",
-                  background: "transparent",
-                  color: "#ff4d4f",
-                  fontSize: 13,
-                  cursor: "pointer",
-                  textAlign: "left",
-                }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLButtonElement).style.background =
-                    "#3c1618")
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLButtonElement).style.background =
-                    "transparent")
-                }
+                className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-[7px] border-0 bg-transparent hover:bg-[#3c1618] text-[#ff4d4f] text-[13px] cursor-pointer text-left transition-colors"
               >
                 <Trash2 style={{ width: 12, height: 12 }} />
                 Delete
@@ -260,7 +190,16 @@ export function ProjectSidebar({
   onRename,
   onDelete,
 }: ProjectSidebarProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("my-projects");
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    if (
+      activeProjectId &&
+      sharedProjects.some((p) => p.id === activeProjectId) &&
+      !ownedProjects.some((p) => p.id === activeProjectId)
+    ) {
+      return "shared";
+    }
+    return "my-projects";
+  });
 
   const projects =
     activeTab === "my-projects" ? ownedProjects : sharedProjects;
@@ -292,9 +231,9 @@ export function ProjectSidebar({
           isOpen ? "translate-x-0" : "pointer-events-none -translate-x-[calc(100%+20px)]"
         )}
         style={{
-          top: 66,
-          bottom: 10,
-          width: 220,
+          top: CANVAS_TOP_OFFSET,
+          bottom: INSET_GUTTER,
+          width: LEFT_SIDEBAR_WIDTH,
           backgroundColor: "#0b0c10",
         }}
       >

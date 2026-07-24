@@ -16,7 +16,7 @@ import { Liveblocks } from "@liveblocks/node";
 import { prepareThreadNotificationEmailAsReact } from "@liveblocks/emails";
 
 const liveblocks = new Liveblocks({
-  secret: "sk_prod_xxxxxxxxxxxxxxxxxxxxxxxx",
+  secret: process.env.LIVEBLOCKS_SECRET_KEY!,
 });
 
 const webhookHandler = new WebhookHandler(
@@ -24,7 +24,7 @@ const webhookHandler = new WebhookHandler(
 );
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  const rawBody = await request.text();
   const headers = request.headers;
 
   // Verify if this is a real webhook request
@@ -32,12 +32,14 @@ export async function POST(request: Request) {
   try {
     event = webhookHandler.verifyRequest({
       headers: headers,
-      rawBody: JSON.stringify(body),
+      rawBody: rawBody,
     });
   } catch (err) {
     console.error(err);
     return new Response("Could not verify webhook call", { status: 400 });
   }
+
+  const body = JSON.parse(rawBody);
 
   // Using `@liveblocks/emails` to create an email
   if (isThreadNotificationEvent(event)) {

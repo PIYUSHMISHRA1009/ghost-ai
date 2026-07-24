@@ -134,15 +134,19 @@ export function useShareDialog({ projectId }: UseShareDialogOptions) {
     [deletingId, projectId]
   );
 
+  const shareUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/editor/${projectId}`
+      : `/editor/${projectId}`;
+
   const handleCopyLink = useCallback(() => {
     if (typeof window === "undefined") return;
-    const url = `${window.location.origin}/editor/${projectId}`;
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(shareUrl);
     setIsCopied(true);
     setTimeout(() => {
       setIsCopied(false);
     }, 2000);
-  }, [projectId]);
+  }, [shareUrl]);
 
   return {
     isOpen,
@@ -155,6 +159,7 @@ export function useShareDialog({ projectId }: UseShareDialogOptions) {
     deletingId,
     error,
     isCopied,
+    shareUrl,
     setInviteEmail,
     openShare,
     closeShare,

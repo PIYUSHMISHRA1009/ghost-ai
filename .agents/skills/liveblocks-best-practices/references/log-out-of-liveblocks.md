@@ -12,10 +12,13 @@ how to do it:
 client.logout();
 ```
 
-In React, get your client like this:
+In React, get your client like this inside a component or custom hook:
 
 ```tsx
 import { useClient } from "@liveblocks/react/suspense";
 
-const client = useClient();
+function useLogout() {
+  const client = useClient();
+  return () => client.logout();
+}
 ```

@@ -44,7 +44,7 @@ The AI Copilots React hooks allow you to fetch, create, and modify AI chats,
 enabling you to build custom AI interfaces, even beyond our default components.
 Chats are stored permanently and the infrastructure is handled for you. All
 hooks work optimistically, meaning they update immediately, before the server
-has synched.
+has synced.
 
 [Learn more](https://liveblocks.io/docs/ready-made-features/ai-agents/liveblocks-ai-copilots/hooks.md).
 

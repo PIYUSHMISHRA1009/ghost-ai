@@ -5,6 +5,11 @@ import { Plus } from "lucide-react";
 import { EditorNavbar } from "@/components/editor/editor-navbar";
 import { ProjectSidebar } from "@/components/editor/project-sidebar";
 import { ProjectDialogs } from "@/components/editor/project-dialogs";
+import {
+  CANVAS_TOP_OFFSET,
+  INSET_GUTTER,
+  CANVAS_LEFT_OPEN_OFFSET,
+} from "@/lib/layout-constants";
 import { useProjectActions } from "@/hooks/use-project-actions";
 import type { Project } from "@/lib/prisma";
 
@@ -52,10 +57,10 @@ export function EditorHomeClient({
       <main
         style={{
           position: "fixed",
-          top: 66,
-          bottom: 10,
-          left: isSidebarOpen ? 244 : 10,
-          right: 10,
+          top: CANVAS_TOP_OFFSET,
+          bottom: INSET_GUTTER,
+          left: isSidebarOpen ? CANVAS_LEFT_OPEN_OFFSET : INSET_GUTTER,
+          right: INSET_GUTTER,
           zIndex: 10,
           overflow: "hidden",
           boxSizing: "border-box",

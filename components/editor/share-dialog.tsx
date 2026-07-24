@@ -27,6 +27,7 @@ interface ShareDialogProps {
   deletingId: string | null;
   error: string | null;
   isCopied: boolean;
+  shareUrl?: string;
   onInviteEmailChange: (value: string) => void;
   onInvite: () => void;
   onRemoveCollaborator: (id: string) => void;
@@ -86,6 +87,7 @@ export function ShareDialog({
   deletingId,
   error,
   isCopied,
+  shareUrl,
   onInviteEmailChange,
   onInvite,
   onRemoveCollaborator,
@@ -235,7 +237,7 @@ export function ShareDialog({
                     className="text-xs truncate select-all"
                     style={{ color: "var(--text-muted)", fontFamily: "var(--font-geist-mono)" }}
                   >
-                    {typeof window !== "undefined" ? window.location.href : ""}
+                    {shareUrl || (typeof window !== "undefined" ? window.location.href : "")}
                   </span>
                 </div>
                 <Button

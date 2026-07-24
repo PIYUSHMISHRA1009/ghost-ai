@@ -11,13 +11,13 @@ for this and do standard
 [error handling](https://liveblocks.io/docs/api-reference/liveblocks-node#error-handling).
 
 ```tsx
-import { Liveblocks } from "@liveblocks/node";
+import { Liveblocks, LiveblocksError } from "@liveblocks/node";
 
 const liveblocks = new Liveblocks({
   secret: process.env.LIVEBLOCKS_SECRET_KEY!,
 });
 
-export function fetchRoom(roomId: string) {
+export async function fetchRoom(roomId: string) {
   let room;
 
   try {
@@ -57,7 +57,8 @@ export function fetchRoom(roomId: string) {
       }
     } else {
       // Handle general errors
-      console.error(`Unexpected error: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`Unexpected error: ${message}`);
     }
     return null;
   }

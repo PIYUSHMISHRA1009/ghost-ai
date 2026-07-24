@@ -12,13 +12,13 @@ don’t.
 
 ```tsx
 // Import the Suspense hook
-import { useThreads } from "@liveblocks/react/suspense";
+import { useThreads as useSuspenseThreads } from "@liveblocks/react/suspense";
 
 // Import the regular hook
 import { useThreads } from "@liveblocks/react";
 ```
 
-### Suspense hooks (often easier)
+## Suspense hooks (often easier)
 
 Suspense hooks can be wrapped in `ClientSideSuspense`, which acts as a
 loading spinner for any components below it. When using this, all components
@@ -28,9 +28,11 @@ below will only render once their hook contents have been loaded.
 import { ClientSideSuspense, useStorage } from "@liveblocks/react/suspense";
 
 function App() {
-  <ClientSideSuspense fallback={<div>Loading…</div>}>
-    <Component />
-  </ClientSideSuspense>;
+  return (
+    <ClientSideSuspense fallback={<div>Loading…</div>}>
+      <Component />
+    </ClientSideSuspense>
+  );
 }
 
 function Component() {
@@ -130,11 +132,11 @@ function Page() {
   return (
     <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
       <RoomProvider id="my-room-id">
-        +++
+        {/* +++ */}
         <ClientSideSuspense fallback={<div>Loading…</div>}>
           <App />
         </ClientSideSuspense>
-        +++
+        {/* +++ */}
       </RoomProvider>
     </LiveblocksProvider>
   );
@@ -159,23 +161,23 @@ function Page() {
         <header>My title</header>
 
         <main>
-          // +++
+          {/* +++ */}
           <ErrorBoundary fallback={<div>Canvas error</div>}>
             <ClientSideSuspense fallback={<div>Loading…</div>}>
               <Canvas />
             </ClientSideSuspense>
           </ErrorBoundary>
-          // +++
+          {/* +++ */}
         </main>
 
         <aside>
-          // +++
+          {/* +++ */}
           <ErrorBoundary fallback={<div>Live avatars error</div>}>
             <ClientSideSuspense fallback={<div>Loading…</div>}>
               <LiveAvatars />
             </ClientSideSuspense>
           </ErrorBoundary>
-          // +++
+          {/* +++ */}
         </aside>
       </RoomProvider>
     </LiveblocksProvider>

@@ -4,7 +4,7 @@ title: "Create custom text editor toolbar"
 
 # Create custom text editor toolbar
 
-Tiptap and Lexical allow you to create custom toolbars, with sty;es that match
+Tiptap and Lexical allow you to create custom toolbars, with styles that match
 the existing toolbar and Liveblocks components. This works the same way for
 `Toolbar` and `FloatingToolbar`. `FloatingToolbar` floats below the current text
 selection.
@@ -208,9 +208,9 @@ use `{ FloatingToolbar }` if you'd like to modify the floating version.
 ```tsx
 import { FloatingToolbar, Toolbar } from "@liveblocks/react-lexical";
 import { Icon } from "@liveblocks/react-ui";
-import { Editor } from "@tiptap/react";
+import { FORMAT_TEXT_COMMAND, LexicalEditor } from "lexical";
 
-function CustomToolbar({ editor }: { editor: Editor | null }) {
+function CustomToolbar({ editor }: { editor: LexicalEditor | null }) {
   return (
     <FloatingToolbar editor={editor}>
       <Toolbar.SectionHistory />
@@ -224,9 +224,7 @@ function CustomToolbar({ editor }: { editor: Editor | null }) {
       <Toolbar.Toggle
         name="Highlight"
         icon={<div>🖊️</div>}
-        active={editor?.isActive("highlight") ?? false}
-        onClick={() => editor?.chain().focus().toggleHighlight().run()}
-        disabled={!editor?.can().chain().focus().toggleHighlight().run()}
+        onClick={() => editor?.dispatchCommand(FORMAT_TEXT_COMMAND, "highlight")}
       />
     </FloatingToolbar>
   );

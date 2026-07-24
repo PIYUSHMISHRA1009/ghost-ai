@@ -16,8 +16,8 @@ import {
  * Custom node renderer for `CANVAS_NODE_TYPE` ("canvasNode").
  * Renders each node according to its explicit shape (`rectangle`, `diamond`,
  * `circle`, `pill`, `cylinder`, `hexagon`) based on `data.shape`.
- * Enforces explicit width and height dimensions and explicit border styling
- * to guarantee all 6 supported shapes render with crisp, non-collapsing geometry.
+ * Enforces explicit width and height dimensions and high-contrast border styling
+ * so all 6 supported shapes render with crisp, crystal-clear geometry over the dark canvas.
  */
 function CanvasNodeComponentBase({
   data,
@@ -29,7 +29,9 @@ function CanvasNodeComponentBase({
   const fillColor = data.color || DEFAULT_NODE_COLOR;
   const colorPair = NODE_COLORS.find((c) => c.fill === fillColor);
   const textColor = colorPair?.text || "#EDEDED";
-  const borderColor = selected ? "#00c8d4" : "#3a3a42";
+
+  // High-contrast subtle border at rest (#4a4a56) and cyan glow (#00c8d4) when selected
+  const borderColor = selected ? "#00c8d4" : "#4a4a56";
 
   // Derive explicit dimensions
   const defaultSize = DEFAULT_SHAPE_SIZES[shape] || DEFAULT_SHAPE_SIZES.rectangle;
@@ -40,20 +42,6 @@ function CanvasNodeComponentBase({
   const renderShapeGeometry = () => {
     switch (shape) {
       case "circle":
-        return (
-          <div
-            className="absolute inset-0 transition-all"
-            style={{
-              backgroundColor: fillColor,
-              border: `1.5px solid ${borderColor}`,
-              borderRadius: 9999,
-              boxShadow: selected
-                ? "0 0 0 1px #00c8d4, 0 8px 20px rgba(0, 0, 0, 0.4)"
-                : "0 4px 12px rgba(0, 0, 0, 0.3)",
-            }}
-          />
-        );
-
       case "pill":
         return (
           <div
@@ -72,7 +60,7 @@ function CanvasNodeComponentBase({
       case "diamond":
         return (
           <svg
-            className="absolute inset-0 h-full w-full transition-all"
+            className="absolute inset-0 h-full w-full transition-all overflow-visible"
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
           >
@@ -88,7 +76,7 @@ function CanvasNodeComponentBase({
       case "hexagon":
         return (
           <svg
-            className="absolute inset-0 h-full w-full transition-all"
+            className="absolute inset-0 h-full w-full transition-all overflow-visible"
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
           >
@@ -104,7 +92,7 @@ function CanvasNodeComponentBase({
       case "cylinder":
         return (
           <svg
-            className="absolute inset-0 h-full w-full transition-all"
+            className="absolute inset-0 h-full w-full transition-all overflow-visible"
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
           >

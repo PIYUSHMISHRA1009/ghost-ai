@@ -77,4 +77,4 @@ Read the `create-rooms-manually` reference for more information.
 
 ## See also
 
-- [Authenticating with ID Tokens](https://liveblocks.io/docs/authentication.md)
+- [Authenticating with ID Tokens](https://liveblocks.io/docs/authentication)

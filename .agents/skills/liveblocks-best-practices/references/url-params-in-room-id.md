@@ -4,11 +4,11 @@ title: "URL params in room ID"
 
 # URL params in room ID
 
-When setting up rooms, which often represend documents in your application, its
+When setting up rooms, which often represent documents in your application, it's
 recommended to use URL params as room IDs. For example, common apps use these
 formats:
 
-```
+```text
 https://www.figma.com/design/GTGJzKyc1k1Wm8Pn0DgjnO
 https://docs.google.com/document/d/1QlfyUA4F8uKwxEt0tDbHRIw1hzgWuzmFkj3J2GcS-KA
 https://www.notion.so/liveblocks/32682084c81280e6bc52e987f7c58019

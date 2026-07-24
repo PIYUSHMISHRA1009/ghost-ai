@@ -10,13 +10,13 @@ interface WorkspacePageProps {
 }
 
 export default async function WorkspacePage({ params }: WorkspacePageProps) {
+  const { roomId } = await params;
   const { userId } = await auth();
 
   if (!userId) {
-    redirect("/sign-in");
+    const destination = roomId ? `/editor/${encodeURIComponent(roomId)}` : "/editor";
+    redirect(`/sign-in?redirect_url=${encodeURIComponent(destination)}`);
   }
-
-  const { roomId } = await params;
 
   if (!roomId || typeof roomId !== "string") {
     return <AccessDenied />;

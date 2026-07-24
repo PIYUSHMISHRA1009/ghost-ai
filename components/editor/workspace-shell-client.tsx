@@ -4,6 +4,13 @@ import { useState } from "react";
 import { Sparkles, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/lib/prisma";
+import {
+  INSET_GUTTER,
+  RIGHT_SIDEBAR_WIDTH,
+  CANVAS_TOP_OFFSET,
+  CANVAS_LEFT_OPEN_OFFSET,
+  CANVAS_RIGHT_OPEN_OFFSET,
+} from "@/lib/layout-constants";
 import { useProjectActions } from "@/hooks/use-project-actions";
 import { useShareDialog } from "@/hooks/use-share-dialog";
 import { EditorNavbar } from "@/components/editor/editor-navbar";
@@ -76,10 +83,10 @@ export function WorkspaceShellClient({
         <main
           style={{
             position: "fixed",
-            top: 66,
-            bottom: 10,
-            left: isSidebarOpen ? 244 : 10,
-            right: isAiSidebarOpen ? 284 : 10,
+            top: CANVAS_TOP_OFFSET,
+            bottom: INSET_GUTTER,
+            left: isSidebarOpen ? CANVAS_LEFT_OPEN_OFFSET : INSET_GUTTER,
+            right: isAiSidebarOpen ? CANVAS_RIGHT_OPEN_OFFSET : INSET_GUTTER,
             zIndex: 10,
             overflow: "hidden",
             boxSizing: "border-box",
@@ -98,6 +105,21 @@ export function WorkspaceShellClient({
           </div>
         </main>
 
+        {/* Mobile AI backdrop scrim */}
+        {isAiSidebarOpen && (
+          <div
+            aria-hidden="true"
+            onClick={() => setIsAiSidebarOpen(false)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 19,
+              backgroundColor: "rgba(0,0,0,0.5)",
+            }}
+            className="sm:hidden"
+          />
+        )}
+
         {/* Right AI Sidebar */}
         <aside
           aria-label="AI Copilot"
@@ -110,9 +132,9 @@ export function WorkspaceShellClient({
               : "translate-x-[calc(100%+20px)] pointer-events-none"
           )}
           style={{
-            top: 66,
-            bottom: 10,
-            width: 262,
+            top: CANVAS_TOP_OFFSET,
+            bottom: INSET_GUTTER,
+            width: RIGHT_SIDEBAR_WIDTH,
             backgroundColor: "#0b0c10",
           }}
         >
@@ -275,6 +297,7 @@ export function WorkspaceShellClient({
         deletingId={shareDialog.deletingId}
         error={shareDialog.error}
         isCopied={shareDialog.isCopied}
+        shareUrl={shareDialog.shareUrl}
         onInviteEmailChange={shareDialog.setInviteEmail}
         onInvite={shareDialog.handleInvite}
         onRemoveCollaborator={shareDialog.handleRemoveCollaborator}

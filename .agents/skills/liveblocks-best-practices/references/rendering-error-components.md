@@ -5,10 +5,10 @@ title: "Rendering error components"
 # Rendering error components
 
 It's recommended to structure your app using the suspense version of Liveblocks
-hooks, alongside `ErrorBoundary` and its `fallback` property used as a an error
+hooks, alongside `ErrorBoundary` and its `fallback` property used as an error
 component. Make sure it's installed:
 
-```
+```sh
 npm install react-error-boundary
 ```
 
@@ -35,21 +35,21 @@ function Page() {
         <header>My title</header>
 
         <main>
-          // +++
+          {/* +++ */}
           <ErrorBoundary fallback={<div>Canvas error</div>}>
             <ClientSideSuspense fallback={<div>Loading…</div>}>
               <Comments />
             </ClientSideSuspense>
           </ErrorBoundary>
-          // +++
+          {/* +++ */}
         </main>
 
         <aside>
-          // +++
+          {/* +++ */}
           <ClientSideSuspense fallback={<div>Loading…</div>}>
             <LiveAvatars />
           </ClientSideSuspense>
-          // +++
+          {/* +++ */}
         </aside>
       </RoomProvider>
     </LiveblocksProvider>

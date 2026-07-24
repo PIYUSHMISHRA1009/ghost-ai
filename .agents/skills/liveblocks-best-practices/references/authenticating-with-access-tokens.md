@@ -75,4 +75,4 @@ also added as an `organizationId`.
 
 ## See also
 
-- [Authenticating with access Tokens](https://liveblocks.io/docs/authentication/access-token.md)
+- [Authenticating with access Tokens](https://liveblocks.io/docs/authentication/access-token)

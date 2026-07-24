@@ -41,11 +41,19 @@ export async function DELETE(
   }
 
   try {
-    await prisma.projectCollaborator.delete({
+    const deleted = await prisma.projectCollaborator.deleteMany({
       where: {
         id: collaboratorId,
+        projectId: projectId,
       },
     });
+
+    if (deleted.count === 0) {
+      return NextResponse.json(
+        { error: "Collaborator not found" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

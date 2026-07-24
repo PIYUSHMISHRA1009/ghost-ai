@@ -91,4 +91,4 @@ of that organization, for example notifications with `useInboxNotifications`.
 
 ## See also
 
-- [Organizations](https://liveblocks.io/docs/authentication/organizations.md)
+- [Organizations](https://liveblocks.io/docs/authentication/organizations)
