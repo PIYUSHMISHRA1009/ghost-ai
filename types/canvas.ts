@@ -45,8 +45,14 @@ export const CANVAS_EDGE_TYPE = "canvasEdge" as const;
 /** A typed React Flow node using CanvasNodeData. */
 export type CanvasNode = Node<CanvasNodeData, typeof CANVAS_NODE_TYPE>;
 
-/** A typed React Flow edge. */
-export type CanvasEdge = Edge<Record<string, unknown>, typeof CANVAS_EDGE_TYPE>;
+/** Data carried on every canvas edge. */
+export interface CanvasEdgeData extends Record<string, unknown> {
+  /** Optional label displayed on the edge. */
+  label?: string;
+}
+
+/** A typed React Flow edge using CanvasEdgeData. */
+export type CanvasEdge = Edge<CanvasEdgeData, typeof CANVAS_EDGE_TYPE>;
 
 // ---------------------------------------------------------------------------
 // Node color palette

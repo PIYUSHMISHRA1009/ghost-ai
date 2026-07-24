@@ -25,12 +25,42 @@ Update this file whenever the current phase, active feature, or implementation s
 - 11 — Base canvas
 - 12 — Shape panel & canvas node creation
 - 13 — Node shape rendering & drag preview
+- 14 — Node editing (resizing & inline label editing)
+- 15 — Floating node color toolbar
+- 16 — Canvas edges & connections
+- 17 — Canvas ergonomics
 
 ## In Progress
 
-- 14 — Canvas node interactions
 
 ## Recently Completed
+
+### 16 — Canvas Edges & Connections
+
+- **`types/canvas.ts`**: Added `CanvasEdgeData` interface with optional `label` field and updated `CanvasEdge` type to use it.
+- **`components/editor/canvas-edge.tsx`**: Created custom edge renderer using `getSmoothStepPath` for right-angle routing. Edges are dimmed at rest (`#4a4a56`, 1.5px) and brighten on hover/select (`#c0c0cc` / `#00c8d4`, 2px). Added invisible 20px transparent hit area for easier hover/click. Arrowhead marker dynamically matches stroke color. Inline label editing via `EdgeLabelRenderer`: double-click to edit, saves on blur/Enter, cancels on Escape. Saved labels render as small pill badges. When an edge is selected with no label, shows faint "Double-click to add label" hint. Label editing interactions are isolated with `nodrag nopan`.
+- **`components/editor/canvas-flow.tsx`**: Registered custom `canvasEdge` type in `edgeTypes`. Wrapped `onConnect` to assign `type: CANVAS_EDGE_TYPE` to new connections via `onEdgesChange`. Imported `Connection` type from `@xyflow/react`.
+- **`components/editor/canvas-node.tsx`**: Added source handles on top and left sides, and target handles on right and bottom sides, enabling any-to-any handle connectivity. All 8 handles share the same subtle white-dot-with-dark-border styling, hidden by default and revealed on hover.
+- **Verification**: `npx tsc --noEmit` and `npm run build` both pass with 0 errors.
+
+### 17 — Canvas Ergonomics
+
+- **`hooks/useKeyboardShortcuts.ts`**: Created `useKeyboardShortcuts` hook receiving the React Flow instance plus undo and redo callbacks. Listens on `window` for keyboard shortcuts and skips handling while focus is inside `INPUT`, `TEXTAREA`, or any `contenteditable` element. Wired `+`/`=` to zoom in, `-` to zoom out, `Cmd/Ctrl+Z` to undo, and `Cmd/Ctrl+Shift+Z` / `Cmd/Ctrl+Y` to redo. Calls `preventDefault` for matched shortcuts to avoid browser conflicts.
+- **`components/editor/canvas-controls.tsx`**: Added pill-shaped control bar at the bottom-left of the canvas via React Flow's `<Panel position="bottom-left">`. Contains two button groups separated by a thin divider: zoom (zoom out, fit view, zoom in) and history (undo, redo). Zoom actions call `reactFlowInstance.zoomIn`, `zoomOut`, and `fitView` with `{ duration: 200 }` animation. Undo and redo use Liveblocks history hooks (`useCanUndo`, `useCanRedo`, `useUndo`, `useRedo`) and are disabled with `opacity: 0.4` and `cursor: not-allowed` when no history is available.
+- **`components/editor/canvas-flow.tsx`**: Imported and rendered `<CanvasControls />` before `<ShapePanel />` so the control bar floats above the shape panel.
+- **Scope**: No changes to shape panel, node/edge rendering, or collaborative state setup.
+- **Verification**: `npx tsc --noEmit` and `npm run build` both pass with 0 errors.
+
+### 15 — Floating Node Color Toolbar
+
+- **`components/editor/canvas-node.tsx`**: Integrated `@xyflow/react`'s `<NodeToolbar>` positioned at `Position.Top` floating above selected nodes without overlapping. Displays 8 swatches corresponding to `NODE_COLORS` palette. Added active state styling (white border, cyan `#00c8d4` ring, and inner text-color dot) and tight text-color glow effect on hover (`boxShadow` tuned to `color.text`). Wired swatch clicks to update `data.color` via `useReactFlow().setNodes`, updating node fill and matching text color live across the collaborative Liveblocks canvas. Attached `nodrag nopan` to isolate toolbar interactions from canvas dragging or panning.
+- **Toolbar usability refinement**: Increased color buttons from `h-9 w-9` (36px) to `h-11 w-11` (44px) for comfortable click targets, widened gap from `gap-2.5` to `gap-3`, and increased toolbar padding from `px-4 py-2.5` to `px-5 py-3`. Ensures icons are clearly visible and click targets are generous, consistent with modern design tools.
+- **Verification**: `npx tsc --noEmit` and `npm run build` both pass with 0 errors.
+
+### 14 — Node Editing (Resizing & Inline Label Editing)
+
+- **`components/editor/canvas-node.tsx`**: Integrated `@xyflow/react`'s `<NodeResizer>` for selected nodes with cyan (`#00c8d4`) handles and lines enforcing a minimum node boundary of 60px width × 40px height. Added inline label editing triggered via double-click on the node shape/label area, rendering a centered `<textarea>` with `nodrag nopan` classes to isolate text editing from canvas dragging or panning. Wired label input updates to `useReactFlow().setNodes`, syncing changes live via `onNodesChange` to Liveblocks storage. Configured blur, `Escape`, and `Enter` keypresses to close editing, and rendered centered italic placeholder (`Type a label...`) when labels are empty.
+- **Verification**: `npx tsc --noEmit` and `npm run build` both pass with 0 errors.
 
 ### 14 — Canvas Node Shape Rendering Fix
 
