@@ -19,12 +19,62 @@ Update this file whenever the current phase, active feature, or implementation s
 - 05 — Prisma schema and data layer
 - 06 — Project CRUD API & persistence
 - 07 — Project UI Wiring & Persistence
+- 08 — Editor workspace shell
+- 09 — Share dialog
+- 10 — Liveblocks setup
+- 11 — Base canvas
+- 12 — Shape panel & canvas node creation
 
 ## In Progress
 
-- 08 — Editor workspace shell
+- 13 — Canvas node interactions
 
 ## Recently Completed
+
+### 12 — Shape Panel & Canvas Node Creation
+
+- **`components/editor/canvas-flow.tsx`**: Updated drag-and-drop handlers to invoke Liveblocks-compliant `onNodesChange([{ type: "add", item: newNode }])` alongside React Flow instance node insertion, guaranteeing immediate sync with Liveblocks Storage. Added `onDragOver` and `onDrop` directly to `<ReactFlow>` and parent wrapper.
+- **`components/editor/shape-panel.tsx`**: Configured draggable shape items with `pointerEvents: "none"` on internal icons and multi-MIME payload support (`application/reactflow` and `text/plain`) for 100% drag reliability across all browsers. Refactored `ShapePanel` to use React Flow's native `<Panel position="bottom-center">` component with explicit inline dark theme styling and `z-index: 1000`.
+- **`components/editor/canvas-node.tsx`**: Built `CanvasNodeComponent` renderer enforcing explicit width and height dimensions and explicit border styling (`border: 1.5px solid ${borderColor}`) to guarantee all 6 shape types (`rectangle`, `diamond`, `circle`, `pill`, `cylinder`, `hexagon`) render with crisp geometry.
+- **`components/editor/canvas-wrapper.tsx`**: Wrapped `<CanvasFlow />` inside `<ReactFlowProvider>` so `useReactFlow()` works seamlessly throughout the canvas component tree.
+- **Verification**: `npx tsc --noEmit` and `npm run build` both pass with 0 errors.
+
+
+
+
+### 12 — Inset Canvas & Dual Sidebar Dynamic Layout
+
+- **`components/editor/workspace-shell-client.tsx`**: Updated canvas container (`main`) layout to use fixed positioning with dynamic `left` (264px when left sidebar open, 12px when closed) and dynamic `right` (304px when AI sidebar open, 12px when closed) with a smooth `0.2s` CSS transition.
+- **`components/editor/editor-home-client.tsx`**: Applied matching dynamic inset canvas panel layout for `/editor` home view.
+- **Sidebars & Canvas Alignment**:
+  - When both sidebars are open (Image 1), left sidebar (240px), center canvas panel, and right AI sidebar (280px) sit side-by-side with uniform 12px gaps and 12px top/bottom margins below the 56px navbar.
+  - When both sidebars are closed (Image 2), center canvas dynamically expands to fill the viewport maintaining a uniform 12px inset border margin around all edges.
+- **Verification**: `npx tsc --noEmit` passes cleanly with 0 errors.
+
+### 10 — Liveblocks Setup
+
+- **`liveblocks.config.ts`** (project root): Defines the Liveblocks global type augmentation. `Presence` carries `cursor: { x, y } | null` and `isThinking: boolean`. `UserMeta` carries `id`, `info.name`, `info.avatar`, and `info.color`.
+- **`lib/liveblocks.ts`**: Exports a cached `Liveblocks` node client singleton (stored on `globalThis` in development for HMR safety). Also exports `getUserCursorColor(userId)` — a djb2-style hash that maps any Clerk user ID to a deterministic color from a fixed 10-color palette.
+- **`app/api/liveblocks-auth/route.ts`**: `POST /api/liveblocks-auth` auth endpoint. Requires Clerk authentication (401 if not signed in). Reads `room` from the request body. Calls `getProjectAccess` to verify the user is owner or collaborator (403 if not). Calls `getOrCreateRoom` to ensure the Liveblocks room exists. Issues an access-token session via `prepareSession` with `name`, `avatar`, and `color` in `userInfo`, granting `FULL_ACCESS` to the specific room.
+- **Packages installed**: `@liveblocks/client`, `@liveblocks/react`, `@liveblocks/node`.
+- **Verification**: `npx tsc --noEmit` passes with 0 errors.
+
+### 09 — Share Dialog
+
+- **`GET /api/projects/[projectId]/collaborators`**: Lists project owner and collaborators (`ProjectCollaborator`), enriched with display names and avatar images from Clerk Backend API (`clerkClient().users.getUserList`). Enforces owner/collaborator access.
+- **`POST /api/projects/[projectId]/collaborators`**: Owner-only endpoint to invite collaborators by email into PostgreSQL with `P2002` duplicate collision handling.
+- **`DELETE /api/projects/[projectId]/collaborators/[collaboratorId]`**: Owner-only endpoint to remove collaborators.
+- **`hooks/use-share-dialog.ts`**: Created hook managing share dialog state, fetching profiles, invite/delete mutations, and project link copy feedback.
+- **`components/editor/share-dialog.tsx`**: Built share modal component supporting owner invite form, copy link button with temporary `Copied!` feedback, Clerk avatars, and read-only view for non-owner collaborators.
+- **`components/editor/workspace-shell-client.tsx`**: Integrated Share dialog with top navbar `Share` button.
+
+### 08 — Editor Workspace Shell
+
+- **`lib/project-access.ts`**: Created access authorization helper (`getProjectAccess`) that resolves Clerk user identity (`userId` + primary email) and verifies project membership against `ownerId` or `collaborators`.
+- **`components/editor/access-denied.tsx`**: Created centered `AccessDenied` view featuring a lock icon badge, access message, and dark cyan return button navigating back to `/editor`.
+- **`components/editor/editor-navbar.tsx`**: Updated top navbar to render project title, Share button, and AI sidebar toggle button when in workspace view.
+- **`components/editor/workspace-shell-client.tsx`**: Created client workspace shell managing `isSidebarOpen` and `isAiSidebarOpen` states, project sidebar integration with `activeProjectId`, dark canvas placeholder area, and collapsible right AI sidebar.
+- **`app/editor/[roomId]/page.tsx`**: Implemented server component route for `/editor/[roomId]` enforcing server-side auth redirect, project access authorization, initial project data loading, and fallback to `<AccessDenied />`.
 
 ### 07 — Project UI Wiring & Persistence
 

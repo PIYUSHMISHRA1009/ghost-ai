@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { UserButton } from "@clerk/nextjs";
 import { Plus, X, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/lib/prisma";
@@ -27,7 +28,7 @@ type Tab = "my-projects" | "shared";
 function EmptyState({ message }: { message: string }) {
   return (
     <div className="flex flex-1 items-center justify-center py-8">
-      <p style={{ fontSize: 13, color: "#505060", textAlign: "center" }}>
+      <p style={{ fontSize: 12, color: "#505060", textAlign: "center" }}>
         {message}
       </p>
     </div>
@@ -53,7 +54,6 @@ function ProjectItem({
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close menu when clicking outside
   useEffect(() => {
     if (!menuOpen) return;
     function handleClick(e: MouseEvent) {
@@ -72,26 +72,48 @@ function ProjectItem({
   return (
     <div
       onClick={handleSelect}
-      className="group relative flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer"
+      className="group relative flex items-center gap-2 cursor-pointer transition-colors"
       style={{
-        transition: "background 0.12s",
-        backgroundColor: isActive ? "#1e1e23" : "transparent",
+        padding: "8px 12px",
+        margin: "2px 8px",
+        borderRadius: 12,
+        transition: "all 0.15s ease",
+        backgroundColor: isActive
+          ? "rgba(0, 200, 212, 0.12)"
+          : "transparent",
+        border: isActive
+          ? "1px solid rgba(0, 200, 212, 0.25)"
+          : "1px solid transparent",
       }}
       onMouseEnter={(e) => {
         if (!isActive)
-          (e.currentTarget as HTMLDivElement).style.background = "#1e1e23";
+          (e.currentTarget as HTMLDivElement).style.backgroundColor =
+            "rgba(255,255,255,0.03)";
       }}
       onMouseLeave={(e) => {
         if (!isActive)
-          (e.currentTarget as HTMLDivElement).style.background = "transparent";
+          (e.currentTarget as HTMLDivElement).style.backgroundColor =
+            "transparent";
       }}
     >
+      {/* Dot */}
+      <span
+        style={{
+          width: 7,
+          height: 7,
+          borderRadius: "50%",
+          flexShrink: 0,
+          backgroundColor: isActive ? "#00c8d4" : "#2a2a30",
+          boxShadow: isActive ? "0 0 8px rgba(0,200,212,0.7)" : "none",
+        }}
+      />
+
       {/* Project name */}
       <span
         style={{
           flex: 1,
           fontSize: 13,
-          color: isActive ? "#f0f0f4" : "#c0c0cc",
+          color: isActive ? "#00c8d4" : "#c0c0cc",
           fontWeight: isActive ? 500 : 400,
           overflow: "hidden",
           whiteSpace: "nowrap",
@@ -138,7 +160,6 @@ function ProjectItem({
             <MoreHorizontal style={{ width: 13, height: 13 }} />
           </button>
 
-          {/* Dropdown menu */}
           {menuOpen && (
             <div
               style={{
@@ -267,15 +288,14 @@ export function ProjectSidebar({
         aria-hidden={!isOpen}
         aria-label="Projects"
         className={cn(
-          "fixed left-0 z-40 flex flex-col transition-transform duration-200 ease-out",
-          isOpen ? "translate-x-0" : "pointer-events-none -translate-x-full"
+          "fixed left-[10px] z-40 flex flex-col transition-transform duration-200 ease-out rounded-2xl overflow-hidden border border-[#2a2a30] shadow-xl",
+          isOpen ? "translate-x-0" : "pointer-events-none -translate-x-[calc(100%+20px)]"
         )}
         style={{
-          top: 56,
-          bottom: 0,
-          width: 200,
-          backgroundColor: "#111114",
-          borderRight: "1px solid #1e1e23",
+          top: 66,
+          bottom: 10,
+          width: 220,
+          backgroundColor: "#0b0c10",
         }}
       >
         {/* Header */}
@@ -284,15 +304,16 @@ export function ProjectSidebar({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "14px 16px 10px",
+            padding: "14px 16px 12px",
+            borderBottom: "1px solid #1a1a22",
           }}
         >
           <span
             style={{
-              fontSize: 14,
-              fontWeight: 500,
+              fontSize: 13,
+              fontWeight: 600,
               color: "#f0f0f4",
-              letterSpacing: "-0.005em",
+              letterSpacing: "-0.01em",
             }}
           >
             Projects
@@ -326,12 +347,16 @@ export function ProjectSidebar({
           </button>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs — matches reference: pill container, active = white text on dark fill */}
         <div
           style={{
             display: "flex",
-            gap: 4,
-            padding: "0 12px 10px",
+            gap: 2,
+            margin: "10px 12px 8px",
+            padding: "3px",
+            backgroundColor: "#18181c",
+            borderRadius: 8,
+            border: "1px solid #222228",
           }}
         >
           {(["my-projects", "shared"] as Tab[]).map((tab) => {
@@ -344,14 +369,15 @@ export function ProjectSidebar({
                 style={{
                   flex: 1,
                   padding: "5px 0",
-                  borderRadius: 8,
+                  borderRadius: 6,
                   border: "none",
-                  fontSize: 12,
-                  fontWeight: 500,
+                  fontSize: 11,
+                  fontWeight: isActive ? 600 : 400,
                   cursor: "pointer",
                   transition: "background 0.15s, color 0.15s",
-                  backgroundColor: isActive ? "#f0f0f4" : "transparent",
-                  color: isActive ? "#080809" : "#808090",
+                  backgroundColor: isActive ? "#2a2a32" : "transparent",
+                  color: isActive ? "#f0f0f4" : "#505060",
+                  fontFamily: "var(--font-geist-sans)",
                 }}
               >
                 {label}
@@ -366,7 +392,7 @@ export function ProjectSidebar({
             flex: 1,
             overflowY: "auto",
             minHeight: 0,
-            padding: "0 4px",
+            paddingTop: 4,
           }}
         >
           {projects.length === 0 ? (
@@ -391,13 +417,23 @@ export function ProjectSidebar({
           )}
         </div>
 
-        {/* Footer — New Project button */}
+        {/* Footer — Avatar + New Project button */}
         <div
           style={{
-            padding: "10px 12px 12px",
-            borderTop: "1px solid #1e1e23",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "10px 12px 14px",
+            borderTop: "1px solid #1a1a22",
           }}
         >
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: "w-8 h-8 rounded-full border border-[#2a2a30]",
+              },
+            }}
+          />
           <button
             type="button"
             onClick={onNewProject}
@@ -406,16 +442,18 @@ export function ProjectSidebar({
               alignItems: "center",
               justifyContent: "center",
               gap: 6,
-              width: "100%",
-              height: 36,
-              borderRadius: 8,
+              flex: 1,
+              height: 34,
+              borderRadius: 16,
               border: "none",
               backgroundColor: "#00c8d4",
               color: "#000",
-              fontSize: 13,
-              fontWeight: 600,
+              fontSize: 12,
+              fontWeight: 700,
               cursor: "pointer",
               transition: "background 0.15s",
+              fontFamily: "var(--font-geist-sans)",
+              letterSpacing: "0.01em",
             }}
             onMouseEnter={(e) =>
               ((e.currentTarget as HTMLButtonElement).style.backgroundColor =
@@ -426,7 +464,7 @@ export function ProjectSidebar({
                 "#00c8d4")
             }
           >
-            <Plus style={{ width: 14, height: 14 }} />
+            <Plus style={{ width: 13, height: 13 }} />
             New Project
           </button>
         </div>

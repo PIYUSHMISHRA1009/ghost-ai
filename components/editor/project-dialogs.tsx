@@ -30,7 +30,7 @@ const CARD_STYLE: React.CSSProperties = {
   maxWidth: 440,
   backgroundColor: "#111114",
   border: "1px solid #2a2a30",
-  borderRadius: 20,
+  borderRadius: 16,
   padding: "28px 28px 24px",
   boxShadow: "0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset",
   outline: "none",
@@ -59,22 +59,22 @@ function CloseButton({ onClose }: CloseButtonProps) {
         width: 28,
         height: 28,
         borderRadius: 8,
-        border: "none",
-        background: "transparent",
+        border: "1px solid #2a2a30",
+        background: "#18181c",
         color: "#505060",
         cursor: "pointer",
         transition: "background 0.12s, color 0.12s",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = "#1e1e23";
+        (e.currentTarget as HTMLButtonElement).style.background = "#2a2a30";
         (e.currentTarget as HTMLButtonElement).style.color = "#c0c0cc";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+        (e.currentTarget as HTMLButtonElement).style.background = "#18181c";
         (e.currentTarget as HTMLButtonElement).style.color = "#505060";
       }}
     >
-      <X style={{ width: 14, height: 14 }} />
+      <X style={{ width: 13, height: 13 }} />
     </button>
   );
 }
@@ -88,9 +88,9 @@ const StyledInput = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLI
         {...props}
         style={{
           width: "100%",
-          height: 42,
-          padding: "0 14px",
-          borderRadius: 10,
+          height: 40,
+          padding: "0 12px",
+          borderRadius: 8,
           border: "1px solid #2a2a30",
           backgroundColor: "#0c0c0f",
           color: "#f0f0f4",
@@ -137,7 +137,7 @@ function PrimaryButton({
         justifyContent: "center",
         height: 36,
         padding: "0 18px",
-        borderRadius: 9,
+        borderRadius: 8,
         border: "none",
         backgroundColor: disabled ? "#1e1e23" : "#00c8d4",
         color: disabled ? "#505060" : "#000",
@@ -184,7 +184,7 @@ function DestructiveButton({
         justifyContent: "center",
         height: 36,
         padding: "0 18px",
-        borderRadius: 9,
+        borderRadius: 8,
         border: "none",
         backgroundColor: "#ff4d4f",
         color: "#fff",
@@ -224,7 +224,7 @@ function CancelButton({ onClose, disabled }: { onClose: () => void; disabled?: b
         justifyContent: "center",
         height: 36,
         padding: "0 16px",
-        borderRadius: 9,
+        borderRadius: 8,
         border: "1px solid #2a2a30",
         backgroundColor: "transparent",
         color: "#808090",
