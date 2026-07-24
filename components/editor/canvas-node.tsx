@@ -45,7 +45,7 @@ function CanvasNodeComponentBase({
       case "pill":
         return (
           <div
-            className="absolute inset-0 transition-all"
+            className="absolute inset-0 h-full w-full transition-all"
             style={{
               backgroundColor: fillColor,
               border: `1.5px solid ${borderColor}`,
@@ -120,7 +120,7 @@ function CanvasNodeComponentBase({
       default:
         return (
           <div
-            className="absolute inset-0 transition-all"
+            className="absolute inset-0 h-full w-full transition-all"
             style={{
               backgroundColor: fillColor,
               border: `1.5px solid ${borderColor}`,
