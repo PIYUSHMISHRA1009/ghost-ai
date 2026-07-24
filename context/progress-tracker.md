@@ -34,6 +34,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ### 14 — Canvas Node Shape Rendering Fix
 
+- **`components/editor/canvas-node.tsx`**: Added `h-full w-full` to the `className` of `div`-based shape renderers (`circle`, `pill`, `rectangle`) in `renderShapeGeometry()`. This ensures empty `div` elements stretch to 100% width and height of their parent node container (e.g., 160px × 80px), matching the behavior of SVG-based shapes (`cylinder`, `diamond`, `hexagon`) and preventing `0px × 0px` box collapse on the main canvas.
 - **`components/editor/canvas-node.tsx`**: Re-applied `h-full w-full` to the `className` of `div`-based shape renderers (`circle`, `pill`, `rectangle`) in `renderShapeGeometry()`. This ensures empty `div` elements stretch to 100% width and height of their parent node container (e.g., 160px × 80px), matching the behavior of SVG-based shapes (`cylinder`, `diamond`, `hexagon`) and preventing `0px × 0px` box collapse on the main canvas.
 - **Verification**: `npx tsc --noEmit` passed with 0 errors. All 6 supported node shapes now render with exact geometry matching the MiniMap.
 
