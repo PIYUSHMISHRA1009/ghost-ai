@@ -2,10 +2,16 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { UserButton } from "@clerk/nextjs";
 import { Plus, X, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/lib/prisma";
 import type { ProjectDialogTarget } from "@/hooks/use-project-actions";
+import {
+  CANVAS_TOP_OFFSET,
+  INSET_GUTTER,
+  LEFT_SIDEBAR_WIDTH,
+} from "@/lib/layout-constants";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -27,7 +33,7 @@ type Tab = "my-projects" | "shared";
 function EmptyState({ message }: { message: string }) {
   return (
     <div className="flex flex-1 items-center justify-center py-8">
-      <p style={{ fontSize: 13, color: "#505060", textAlign: "center" }}>
+      <p style={{ fontSize: 12, color: "#505060", textAlign: "center" }}>
         {message}
       </p>
     </div>
@@ -53,7 +59,6 @@ function ProjectItem({
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close menu when clicking outside
   useEffect(() => {
     if (!menuOpen) return;
     function handleClick(e: MouseEvent) {
@@ -72,26 +77,35 @@ function ProjectItem({
   return (
     <div
       onClick={handleSelect}
-      className="group relative flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer"
+      className={`group relative flex items-center gap-2 cursor-pointer transition-all ${
+        isActive
+          ? "bg-[rgba(0,200,212,0.12)] border border-[rgba(0,200,212,0.25)]"
+          : "bg-transparent border border-transparent hover:bg-white/[0.03]"
+      }`}
       style={{
-        transition: "background 0.12s",
-        backgroundColor: isActive ? "#1e1e23" : "transparent",
-      }}
-      onMouseEnter={(e) => {
-        if (!isActive)
-          (e.currentTarget as HTMLDivElement).style.background = "#1e1e23";
-      }}
-      onMouseLeave={(e) => {
-        if (!isActive)
-          (e.currentTarget as HTMLDivElement).style.background = "transparent";
+        padding: "8px 12px",
+        margin: "2px 8px",
+        borderRadius: 12,
       }}
     >
+      {/* Dot */}
+      <span
+        style={{
+          width: 7,
+          height: 7,
+          borderRadius: "50%",
+          flexShrink: 0,
+          backgroundColor: isActive ? "#00c8d4" : "#2a2a30",
+          boxShadow: isActive ? "0 0 8px rgba(0,200,212,0.7)" : "none",
+        }}
+      />
+
       {/* Project name */}
       <span
         style={{
           flex: 1,
           fontSize: 13,
-          color: isActive ? "#f0f0f4" : "#c0c0cc",
+          color: isActive ? "#00c8d4" : "#c0c0cc",
           fontWeight: isActive ? 500 : 400,
           overflow: "hidden",
           whiteSpace: "nowrap",
@@ -111,34 +125,13 @@ function ProjectItem({
               e.stopPropagation();
               setMenuOpen((prev) => !prev);
             }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 22,
-              height: 22,
-              borderRadius: 5,
-              border: "none",
-              background: "transparent",
-              color: "#505060",
-              cursor: "pointer",
-              padding: 0,
-              opacity: menuOpen ? 1 : undefined,
-            }}
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
-            onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLButtonElement).style.background =
-                "#2a2a30")
-            }
-            onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLButtonElement).style.background =
-                "transparent")
-            }
+            className={`flex items-center justify-center w-[22px] h-[22px] rounded-[5px] border-0 bg-transparent text-[#505060] hover:bg-[#2a2a30] hover:text-[#c0c0cc] cursor-pointer p-0 transition-all ${
+              menuOpen ? "opacity-100 bg-[#2a2a30] text-[#c0c0cc]" : "opacity-0 group-hover:opacity-100"
+            }`}
           >
             <MoreHorizontal style={{ width: 13, height: 13 }} />
           </button>
 
-          {/* Dropdown menu */}
           {menuOpen && (
             <div
               style={{
@@ -160,28 +153,7 @@ function ProjectItem({
                   setMenuOpen(false);
                   onRename({ id: project.id, name: project.name });
                 }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  width: "100%",
-                  padding: "6px 10px",
-                  borderRadius: 7,
-                  border: "none",
-                  background: "transparent",
-                  color: "#c0c0cc",
-                  fontSize: 13,
-                  cursor: "pointer",
-                  textAlign: "left",
-                }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLButtonElement).style.background =
-                    "#1e1e23")
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLButtonElement).style.background =
-                    "transparent")
-                }
+                className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-[7px] border-0 bg-transparent hover:bg-[#1e1e23] text-[#c0c0cc] text-[13px] cursor-pointer text-left transition-colors"
               >
                 <Pencil style={{ width: 12, height: 12, color: "#808090" }} />
                 Rename
@@ -193,28 +165,7 @@ function ProjectItem({
                   setMenuOpen(false);
                   onDelete({ id: project.id, name: project.name });
                 }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  width: "100%",
-                  padding: "6px 10px",
-                  borderRadius: 7,
-                  border: "none",
-                  background: "transparent",
-                  color: "#ff4d4f",
-                  fontSize: 13,
-                  cursor: "pointer",
-                  textAlign: "left",
-                }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLButtonElement).style.background =
-                    "#3c1618")
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLButtonElement).style.background =
-                    "transparent")
-                }
+                className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-[7px] border-0 bg-transparent hover:bg-[#3c1618] text-[#ff4d4f] text-[13px] cursor-pointer text-left transition-colors"
               >
                 <Trash2 style={{ width: 12, height: 12 }} />
                 Delete
@@ -239,7 +190,16 @@ export function ProjectSidebar({
   onRename,
   onDelete,
 }: ProjectSidebarProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("my-projects");
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    if (
+      activeProjectId &&
+      sharedProjects.some((p) => p.id === activeProjectId) &&
+      !ownedProjects.some((p) => p.id === activeProjectId)
+    ) {
+      return "shared";
+    }
+    return "my-projects";
+  });
 
   const projects =
     activeTab === "my-projects" ? ownedProjects : sharedProjects;
@@ -267,15 +227,14 @@ export function ProjectSidebar({
         aria-hidden={!isOpen}
         aria-label="Projects"
         className={cn(
-          "fixed left-0 z-40 flex flex-col transition-transform duration-200 ease-out",
-          isOpen ? "translate-x-0" : "pointer-events-none -translate-x-full"
+          "fixed left-[10px] z-40 flex flex-col transition-transform duration-200 ease-out rounded-2xl overflow-hidden border border-[#2a2a30] shadow-xl",
+          isOpen ? "translate-x-0" : "pointer-events-none -translate-x-[calc(100%+20px)]"
         )}
         style={{
-          top: 56,
-          bottom: 0,
-          width: 200,
-          backgroundColor: "#111114",
-          borderRight: "1px solid #1e1e23",
+          top: CANVAS_TOP_OFFSET,
+          bottom: INSET_GUTTER,
+          width: LEFT_SIDEBAR_WIDTH,
+          backgroundColor: "#0b0c10",
         }}
       >
         {/* Header */}
@@ -284,15 +243,16 @@ export function ProjectSidebar({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "14px 16px 10px",
+            padding: "14px 16px 12px",
+            borderBottom: "1px solid #1a1a22",
           }}
         >
           <span
             style={{
-              fontSize: 14,
-              fontWeight: 500,
+              fontSize: 13,
+              fontWeight: 600,
               color: "#f0f0f4",
-              letterSpacing: "-0.005em",
+              letterSpacing: "-0.01em",
             }}
           >
             Projects
@@ -326,12 +286,16 @@ export function ProjectSidebar({
           </button>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs — matches reference: pill container, active = white text on dark fill */}
         <div
           style={{
             display: "flex",
-            gap: 4,
-            padding: "0 12px 10px",
+            gap: 2,
+            margin: "10px 12px 8px",
+            padding: "3px",
+            backgroundColor: "#18181c",
+            borderRadius: 8,
+            border: "1px solid #222228",
           }}
         >
           {(["my-projects", "shared"] as Tab[]).map((tab) => {
@@ -344,14 +308,15 @@ export function ProjectSidebar({
                 style={{
                   flex: 1,
                   padding: "5px 0",
-                  borderRadius: 8,
+                  borderRadius: 6,
                   border: "none",
-                  fontSize: 12,
-                  fontWeight: 500,
+                  fontSize: 11,
+                  fontWeight: isActive ? 600 : 400,
                   cursor: "pointer",
                   transition: "background 0.15s, color 0.15s",
-                  backgroundColor: isActive ? "#f0f0f4" : "transparent",
-                  color: isActive ? "#080809" : "#808090",
+                  backgroundColor: isActive ? "#2a2a32" : "transparent",
+                  color: isActive ? "#f0f0f4" : "#505060",
+                  fontFamily: "var(--font-geist-sans)",
                 }}
               >
                 {label}
@@ -366,7 +331,7 @@ export function ProjectSidebar({
             flex: 1,
             overflowY: "auto",
             minHeight: 0,
-            padding: "0 4px",
+            paddingTop: 4,
           }}
         >
           {projects.length === 0 ? (
@@ -391,13 +356,23 @@ export function ProjectSidebar({
           )}
         </div>
 
-        {/* Footer — New Project button */}
+        {/* Footer — Avatar + New Project button */}
         <div
           style={{
-            padding: "10px 12px 12px",
-            borderTop: "1px solid #1e1e23",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "10px 12px 14px",
+            borderTop: "1px solid #1a1a22",
           }}
         >
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: "w-8 h-8 rounded-full border border-[#2a2a30]",
+              },
+            }}
+          />
           <button
             type="button"
             onClick={onNewProject}
@@ -406,16 +381,18 @@ export function ProjectSidebar({
               alignItems: "center",
               justifyContent: "center",
               gap: 6,
-              width: "100%",
-              height: 36,
-              borderRadius: 8,
+              flex: 1,
+              height: 34,
+              borderRadius: 16,
               border: "none",
               backgroundColor: "#00c8d4",
               color: "#000",
-              fontSize: 13,
-              fontWeight: 600,
+              fontSize: 12,
+              fontWeight: 700,
               cursor: "pointer",
               transition: "background 0.15s",
+              fontFamily: "var(--font-geist-sans)",
+              letterSpacing: "0.01em",
             }}
             onMouseEnter={(e) =>
               ((e.currentTarget as HTMLButtonElement).style.backgroundColor =
@@ -426,7 +403,7 @@ export function ProjectSidebar({
                 "#00c8d4")
             }
           >
-            <Plus style={{ width: 14, height: 14 }} />
+            <Plus style={{ width: 13, height: 13 }} />
             New Project
           </button>
         </div>

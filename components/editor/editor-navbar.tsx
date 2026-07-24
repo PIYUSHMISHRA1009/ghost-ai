@@ -1,17 +1,26 @@
 "use client";
 
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, Share2, Sparkles } from "lucide-react";
 import { SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import { NAVBAR_HEIGHT } from "@/lib/layout-constants";
 
 interface EditorNavbarProps {
   isSidebarOpen: boolean;
   onSidebarToggle: () => void;
+  projectName?: string;
+  onShare?: () => void;
+  isAiSidebarOpen?: boolean;
+  onAiSidebarToggle?: () => void;
 }
 
 export function EditorNavbar({
   isSidebarOpen,
   onSidebarToggle,
+  projectName,
+  onShare,
+  isAiSidebarOpen,
+  onAiSidebarToggle,
 }: EditorNavbarProps) {
   const SidebarIcon = isSidebarOpen ? PanelLeftClose : PanelLeftOpen;
 
@@ -22,7 +31,7 @@ export function EditorNavbar({
         top: 0,
         left: 0,
         right: 0,
-        height: 56,
+        height: NAVBAR_HEIGHT,
         zIndex: 30,
         display: "flex",
         alignItems: "center",
@@ -30,22 +39,54 @@ export function EditorNavbar({
         borderBottom: "1px solid #1e1e23",
       }}
     >
-      {/* ── LEFT: sidebar toggle ─────────────────────────────── */}
-      <div style={{ paddingLeft: 12, flexShrink: 0 }}>
-        <Button
-          aria-label={
-            isSidebarOpen ? "Close projects sidebar" : "Open projects sidebar"
-          }
+      {/* ── LEFT: sidebar toggle & project title ────────────────────────── */}
+      <div style={{ paddingLeft: 12, display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+        <button
+          aria-label={isSidebarOpen ? "Close projects sidebar" : "Open projects sidebar"}
           onClick={onSidebarToggle}
-          size="icon"
-          variant="ghost"
-          style={{ color: "#808090" }}
+          className="flex items-center justify-center w-8 h-8 rounded-lg text-[#808090] hover:text-[#c0c0cc] hover:bg-[#1e1e23] active:bg-[#18181c] focus-visible:ring-2 focus-visible:ring-[#00c8d4] outline-none transition-colors cursor-pointer bg-transparent border-0"
         >
-          <SidebarIcon style={{ width: 20, height: 20 }} />
-        </Button>
+          <SidebarIcon style={{ width: 18, height: 18 }} />
+        </button>
+
+        {projectName && (
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ height: 20, width: 1, backgroundColor: "#2a2a30" }} />
+            <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              <h1
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "#f0f0f4",
+                  margin: 0,
+                  letterSpacing: "-0.01em",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  textOverflow: "ellipsis",
+                  maxWidth: 220,
+                  lineHeight: 1.2,
+                }}
+              >
+                {projectName}
+              </h1>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 400,
+                  color: "#505060",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  lineHeight: 1,
+                }}
+              >
+                Workspace
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* ── RIGHT: user avatar — pushed all the way right with marginLeft auto ── */}
+      {/* ── RIGHT: actions & user avatar ───────────────────────────────── */}
       <div
         style={{
           marginLeft: "auto",
@@ -56,9 +97,36 @@ export function EditorNavbar({
           flexShrink: 0,
         }}
       >
+        {/* Share Button */}
+        {onShare && (
+          <button
+            onClick={onShare}
+            className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg border border-[#2a2a30] hover:border-[#3a3a42] bg-[#18181c] hover:bg-[#1e1e23] text-[#c0c0cc] text-[12px] font-medium transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00c8d4]"
+          >
+            <Share2 style={{ width: 13, height: 13, color: "#00c8d4" }} />
+            Share
+          </button>
+        )}
+
+        {/* AI Sidebar Toggle */}
+        {onAiSidebarToggle && (
+          <button
+            aria-label={isAiSidebarOpen ? "Close AI Assistant" : "Open AI Assistant"}
+            onClick={onAiSidebarToggle}
+            className={`inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg text-[12px] font-medium transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#8b82ff] ${
+              isAiSidebarOpen
+                ? "border border-[rgba(100,87,249,0.4)] bg-[rgba(100,87,249,0.12)] text-[#8b82ff]"
+                : "border border-[#2a2a30] hover:border-[rgba(100,87,249,0.3)] bg-[#18181c] hover:bg-[rgba(100,87,249,0.08)] text-[#808090] hover:text-[#8b82ff]"
+            }`}
+          >
+            <Sparkles style={{ width: 13, height: 13 }} />
+            AI Copilot
+          </button>
+        )}
+
         <Show when="signed-out">
           <SignInButton mode="modal">
-            <Button variant="ghost" size="sm" style={{ color: "#c0c0cc" }}>
+            <Button variant="ghost" size="sm" style={{ color: "#c0c0cc", borderRadius: 8 }}>
               Sign in
             </Button>
           </SignInButton>
@@ -69,6 +137,7 @@ export function EditorNavbar({
                 backgroundColor: "#00c8d4",
                 color: "#000",
                 fontWeight: 600,
+                borderRadius: 8,
               }}
             >
               Sign up
@@ -83,13 +152,13 @@ export function EditorNavbar({
                 rootBox:
                   "flex items-center",
                 userButtonTrigger:
-                  "focus:shadow-none focus-visible:ring-2 focus-visible:ring-[#00c8d4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#111114] outline-none rounded-full",
+                  "focus:shadow-none focus-visible:ring-2 focus-visible:ring-[#00c8d4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#111114] outline-none rounded-lg",
                 avatarBox:
-                  "h-[34px] w-[34px] rounded-full ring-2 ring-white/10 hover:ring-white/25 transition-all",
+                  "h-[30px] w-[30px] rounded-lg ring-1 ring-white/10 hover:ring-white/25 transition-all",
                 userButtonPopoverCard:
-                  "bg-[#111114] border border-[#2a2a30] shadow-2xl rounded-2xl",
+                  "bg-[#111114] border border-[#2a2a30] shadow-2xl rounded-xl",
                 userButtonPopoverActionButton:
-                  "hover:bg-[#1e1e23] rounded-xl",
+                  "hover:bg-[#1e1e23] rounded-lg",
                 userButtonPopoverActionButtonText:
                   "text-[13px] text-[#c0c0cc]",
                 userButtonPopoverActionButtonIcon:

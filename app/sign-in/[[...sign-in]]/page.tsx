@@ -5,7 +5,7 @@ export default function SignInPage() {
   return (
     <AuthLayout>
       <SignIn
-        forceRedirectUrl="/editor"
+        fallbackRedirectUrl="/editor"
         appearance={{
           elements: {
             // ── Outer wrappers ──────────────────────────────────

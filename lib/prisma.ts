@@ -15,7 +15,18 @@ function createAccelerateClient(): PrismaClient {
 // ─── Direct pg adapter ────────────────────────────────────────────────────────
 
 function createPgClient(): PrismaClient {
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+  let connectionString = process.env.DATABASE_URL;
+  if (
+    connectionString &&
+    connectionString.includes("sslmode=require") &&
+    !connectionString.includes("uselibpqcompat=")
+  ) {
+    connectionString = connectionString.replace(
+      "sslmode=require",
+      "uselibpqcompat=true&sslmode=require"
+    );
+  }
+  const adapter = new PrismaPg({ connectionString });
   return new PrismaClient({ adapter });
 }
 
