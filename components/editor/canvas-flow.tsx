@@ -26,6 +26,7 @@ import {
   MiniMap,
   useReactFlow,
   type NodeMouseHandler,
+  type Connection,
 } from "@xyflow/react";
 import { useLiveblocksFlow, Cursors } from "@liveblocks/react-flow";
 import "@xyflow/react/dist/style.css";
@@ -33,23 +34,28 @@ import "@liveblocks/react-flow/styles.css";
 
 import {
   CANVAS_NODE_TYPE,
+  CANVAS_EDGE_TYPE,
   DEFAULT_NODE_COLOR,
   type CanvasNode,
   type CanvasEdge,
   type NodeShape,
 } from "@/types/canvas";
 import { CanvasNodeComponent } from "@/components/editor/canvas-node";
+import { CanvasEdge as CanvasEdgeComponent } from "@/components/editor/canvas-edge";
 import { ShapePanel } from "@/components/editor/shape-panel";
+import { CanvasControls } from "@/components/editor/canvas-controls";
 
 // Node type map registered with React Flow
 const nodeTypes = {
   [CANVAS_NODE_TYPE]: CanvasNodeComponent,
 };
 
-const edgeTypes = {};
+const edgeTypes = {
+  [CANVAS_EDGE_TYPE]: CanvasEdgeComponent,
+};
 
 export function CanvasFlow() {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onDelete } =
+  const { nodes, edges, onNodesChange, onEdgesChange, onDelete } =
     useLiveblocksFlow<CanvasNode, CanvasEdge>({
       suspense: true,
       nodes: { initial: [] },
@@ -57,6 +63,25 @@ export function CanvasFlow() {
     });
 
   const reactFlowInstance = useReactFlow<CanvasNode, CanvasEdge>();
+
+  const handleConnect = useCallback(
+    (connection: Connection) => {
+      onEdgesChange([
+        {
+          type: "add",
+          item: {
+            id: `${connection.source}-${connection.target}-${crypto.randomUUID()}`,
+            source: connection.source,
+            target: connection.target,
+            sourceHandle: connection.sourceHandle,
+            targetHandle: connection.targetHandle,
+            type: CANVAS_EDGE_TYPE,
+          },
+        },
+      ]);
+    },
+    [onEdgesChange]
+  );
 
   // Prevent default context menu on nodes (reserved for future node toolbar).
   const onNodeContextMenu = useCallback<NodeMouseHandler>(
@@ -131,7 +156,7 @@ export function CanvasFlow() {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+        onConnect={handleConnect}
         onDelete={onDelete}
         onNodeContextMenu={onNodeContextMenu}
         onDragOver={onDragOver}
@@ -160,6 +185,9 @@ export function CanvasFlow() {
         />
 
         <Cursors />
+
+        {/* Floating control bar at bottom-left */}
+        <CanvasControls />
 
         {/* Floating shape panel toolbar at bottom center */}
         <ShapePanel />
