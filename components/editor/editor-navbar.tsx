@@ -1,6 +1,6 @@
 "use client";
 
-import { PanelLeftClose, PanelLeftOpen, Share2, Sparkles } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, Share2, Sparkles, FolderOpen } from "lucide-react";
 import { SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { NAVBAR_HEIGHT } from "@/lib/layout-constants";
@@ -12,6 +12,7 @@ interface EditorNavbarProps {
   onShare?: () => void;
   isAiSidebarOpen?: boolean;
   onAiSidebarToggle?: () => void;
+  onOpenTemplates?: () => void;
 }
 
 export function EditorNavbar({
@@ -21,6 +22,7 @@ export function EditorNavbar({
   onShare,
   isAiSidebarOpen,
   onAiSidebarToggle,
+  onOpenTemplates,
 }: EditorNavbarProps) {
   const SidebarIcon = isSidebarOpen ? PanelLeftClose : PanelLeftOpen;
 
@@ -105,6 +107,17 @@ export function EditorNavbar({
           >
             <Share2 style={{ width: 13, height: 13, color: "#00c8d4" }} />
             Share
+          </button>
+        )}
+
+        {/* Starter Templates Button */}
+        {onOpenTemplates && (
+          <button
+            onClick={onOpenTemplates}
+            className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg border border-[#2a2a30] hover:border-[#3a3a42] bg-[#18181c] hover:bg-[#1e1e23] text-[#c0c0cc] text-[12px] font-medium transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00c8d4]"
+          >
+            <FolderOpen style={{ width: 13, height: 13, color: "#00c8d4" }} />
+            Templates
           </button>
         )}
 

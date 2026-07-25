@@ -14,6 +14,7 @@
  *                    └─ CanvasFlow (React Flow + useLiveblocksFlow)
  */
 
+import { forwardRef } from "react";
 import { LiveblocksProvider, RoomProvider } from "@liveblocks/react";
 import { ClientSideSuspense } from "@liveblocks/react/suspense";
 import { ReactFlowProvider } from "@xyflow/react";
@@ -21,8 +22,9 @@ import { ErrorBoundary } from "react-error-boundary";
 import { AlertTriangle, Loader2 } from "lucide-react";
 
 import { CanvasFlow } from "@/components/editor/canvas-flow";
+import type { CanvasTemplate } from "@/components/editor/starter-templates";
 
-interface CanvasWrapperProps {
+export interface CanvasWrapperProps {
   /** The project ID — used as the Liveblocks room ID. */
   roomId: string;
 }
@@ -98,7 +100,10 @@ function CanvasError() {
 // CanvasWrapper
 // ---------------------------------------------------------------------------
 
-export function CanvasWrapper({ roomId }: CanvasWrapperProps) {
+export const CanvasWrapper = forwardRef<
+  { importTemplate: (template: CanvasTemplate) => void },
+  CanvasWrapperProps
+>(function CanvasWrapper({ roomId }, ref) {
   return (
     <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
       <RoomProvider
@@ -113,12 +118,11 @@ export function CanvasWrapper({ roomId }: CanvasWrapperProps) {
         >
           <ClientSideSuspense fallback={<CanvasLoading />}>
             <ReactFlowProvider>
-              <CanvasFlow />
+              <CanvasFlow ref={ref} />
             </ReactFlowProvider>
           </ClientSideSuspense>
         </ErrorBoundary>
       </RoomProvider>
     </LiveblocksProvider>
   );
-}
-
+});

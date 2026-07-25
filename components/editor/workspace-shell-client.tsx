@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Sparkles, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/lib/prisma";
@@ -18,6 +18,8 @@ import { ProjectSidebar } from "@/components/editor/project-sidebar";
 import { ProjectDialogs } from "@/components/editor/project-dialogs";
 import { ShareDialog } from "@/components/editor/share-dialog";
 import { CanvasWrapper } from "@/components/editor/canvas-wrapper";
+import { type CanvasTemplate } from "@/components/editor/starter-templates";
+import { StarterTemplatesModal } from "@/components/editor/starter-templates-modal";
 
 interface WorkspaceShellClientProps {
   project: Project;
@@ -32,9 +34,19 @@ export function WorkspaceShellClient({
 }: WorkspaceShellClientProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(false);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const canvasRef = useRef<{ importTemplate: (template: CanvasTemplate) => void }>(null);
 
   const dialogs = useProjectActions({ activeProjectId: project.id });
   const shareDialog = useShareDialog({ projectId: project.id });
+
+  const handleOpenTemplates = useCallback(() => {
+    setIsTemplateModalOpen(true);
+  }, []);
+
+  const handleTemplateImport = useCallback((template: CanvasTemplate) => {
+    canvasRef.current?.importTemplate(template);
+  }, []);
 
   return (
     <div
@@ -56,6 +68,7 @@ export function WorkspaceShellClient({
         onShare={shareDialog.openShare}
         isAiSidebarOpen={isAiSidebarOpen}
         onAiSidebarToggle={() => setIsAiSidebarOpen((prev) => !prev)}
+        onOpenTemplates={handleOpenTemplates}
       />
 
       {/* Main Workspace Body */}
@@ -101,7 +114,7 @@ export function WorkspaceShellClient({
                 "0 12px 32px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.03)",
             }}
           >
-            <CanvasWrapper roomId={project.id} />
+            <CanvasWrapper ref={canvasRef} roomId={project.id} />
           </div>
         </main>
 
@@ -302,6 +315,13 @@ export function WorkspaceShellClient({
         onInvite={shareDialog.handleInvite}
         onRemoveCollaborator={shareDialog.handleRemoveCollaborator}
         onCopyLink={shareDialog.handleCopyLink}
+      />
+
+      {/* Starter Templates Modal */}
+      <StarterTemplatesModal
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
+        onImport={handleTemplateImport}
       />
     </div>
   );
