@@ -29,11 +29,24 @@ Update this file whenever the current phase, active feature, or implementation s
 - 15 — Floating node color toolbar
 - 16 — Canvas edges & connections
 - 17 — Canvas ergonomics
+- 18 — Starter templates
 
 ## In Progress
 
 
 ## Recently Completed
+
+### 18 — Import Template Dialog Redesign
+
+- **`components/editor/starter-templates-modal.tsx`**: Completely redesigned the "Import Template" dialog box to match the reference image:
+  - Charcoal dark surface modal (`#12131a`, `rounded-[24px]`, `border border-[#252634]`).
+  - Styled `⌘Z` undo keyboard shortcut badge in header description.
+  - Custom top-right circular close button.
+  - 3-column side-by-side template card grid for Microservices, CI/CD Pipeline, and Event-Driven System.
+  - Custom SVG diagram graphics for each template preview matching the node layouts in the reference image.
+  - Dark outline `Import` action button with download icon.
+- **`components/editor/starter-templates.tsx`**: Updated template descriptions to match the exact text from the reference image.
+- **Verification**: `npx tsc --noEmit` passes cleanly with 0 errors.
 
 ### 16 — Canvas Edges & Connections
 
@@ -49,6 +62,16 @@ Update this file whenever the current phase, active feature, or implementation s
 - **`components/editor/canvas-controls.tsx`**: Added pill-shaped control bar at the bottom-left of the canvas via React Flow's `<Panel position="bottom-left">`. Contains two button groups separated by a thin divider: zoom (zoom out, fit view, zoom in) and history (undo, redo). Zoom actions call `reactFlowInstance.zoomIn`, `zoomOut`, and `fitView` with `{ duration: 200 }` animation. Undo and redo use Liveblocks history hooks (`useCanUndo`, `useCanRedo`, `useUndo`, `useRedo`) and are disabled with `opacity: 0.4` and `cursor: not-allowed` when no history is available.
 - **`components/editor/canvas-flow.tsx`**: Imported and rendered `<CanvasControls />` before `<ShapePanel />` so the control bar floats above the shape panel.
 - **Scope**: No changes to shape panel, node/edge rendering, or collaborative state setup.
+- **Verification**: `npx tsc --noEmit` and `npm run build` both pass with 0 errors.
+
+### 18 — Starter Templates
+
+- **`components/editor/starter-templates.ts`**: Defined `CanvasTemplate` interface (`id`, `name`, `description`, `nodes`, `edges`) and exported `CANVAS_TEMPLATES` array with 3 predefined templates: `microservices` (API Gateway, 3 services, Message Queue, Database), `cicd` (Git Repo, Build, Test, Deploy, Monitor, Alert), and `event-driven` (Event Source, Event Bus, 2 Processors, Data Sink, Cache). Each template uses the shared canvas types, `NODE_COLORS` palette, and helper functions (`createNode`, `createEdge`) for readability.
+- **`components/editor/starter-templates-modal.tsx`**: Created modal using shadcn `Dialog` with a scrollable grid of template cards. Each card renders a lightweight SVG preview that computes bounds from node positions, scales to a fixed 240×140 viewport, draws edges as simple lines between node centers, and draws nodes using their shape and color data (supports rectangle, pill, circle, diamond, cylinder, hexagon). Cards display name, description, and an `Import` button wired to `onImport`.
+- **`components/editor/editor-navbar.tsx`**: Added `onOpenTemplates` prop and a `Templates` button with `FolderOpen` icon to the right action group.
+- **`components/editor/workspace-shell-client.tsx`**: Manages `isTemplateModalOpen` state and a `canvasRef` forwarded through `CanvasWrapper` to `CanvasFlow`. Renders `<StarterTemplatesModal>` and handles `handleTemplateImport` by calling `canvasRef.current?.importTemplate(template)`.
+- **`components/editor/canvas-wrapper.tsx`**: Changed to `forwardRef` to forward the ref to `CanvasFlow`.
+- **`components/editor/canvas-flow.tsx`**: Changed to `forwardRef` and exposed `importTemplate` via `useImperativeHandle`. When a template is imported, it first removes all existing nodes and edges, then adds the template nodes and edges, and finally calls `fitView({ duration: 200 })` via `requestAnimationFrame`.
 - **Verification**: `npx tsc --noEmit` and `npm run build` both pass with 0 errors.
 
 ### 15 — Floating Node Color Toolbar
