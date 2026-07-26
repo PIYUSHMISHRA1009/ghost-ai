@@ -18,12 +18,13 @@
  *   - Live cursors via <Cursors />
  */
 
-import { useCallback, useImperativeHandle, forwardRef } from "react";
+import { useCallback, useImperativeHandle, forwardRef, useEffect, useRef } from "react";
 import {
   ReactFlow,
   Background,
   BackgroundVariant,
   MiniMap,
+  Panel,
   useReactFlow,
   type NodeMouseHandler,
   type Connection,
@@ -46,10 +47,18 @@ import { CanvasNodeComponent } from "@/components/editor/canvas-node";
 import { CanvasEdge as CanvasEdgeComponent } from "@/components/editor/canvas-edge";
 import { ShapePanel } from "@/components/editor/shape-panel";
 import { CanvasControls } from "@/components/editor/canvas-controls";
+import { PresenceAvatars } from "@/components/editor/presence-avatars";
+import { CustomLiveCursor } from "@/components/editor/live-cursor";
 import { type CanvasTemplate } from "@/components/editor/starter-templates";
+import { useCanvasAutosave, type SaveStatus } from "@/hooks/use-canvas-autosave";
 
 export interface CanvasFlowHandle {
   importTemplate: (template: CanvasTemplate) => void;
+}
+
+export interface CanvasFlowProps {
+  roomId: string;
+  onSaveStatusChange?: (status: SaveStatus, triggerSave: () => void) => void;
 }
 
 // Node type map registered with React Flow
@@ -61,8 +70,8 @@ const edgeTypes = {
   [CANVAS_EDGE_TYPE]: CanvasEdgeComponent,
 };
 
-export const CanvasFlow = forwardRef<CanvasFlowHandle, object>(
-  function CanvasFlow(_props, ref) {
+export const CanvasFlow = forwardRef<CanvasFlowHandle, CanvasFlowProps>(
+  function CanvasFlow({ roomId, onSaveStatusChange }, ref) {
     const { nodes, edges, onNodesChange, onEdgesChange, onDelete } =
       useLiveblocksFlow<CanvasNode, CanvasEdge>({
         suspense: true,
@@ -71,6 +80,67 @@ export const CanvasFlow = forwardRef<CanvasFlowHandle, object>(
       });
 
     const reactFlowInstance = useReactFlow<CanvasNode, CanvasEdge>();
+
+    // ── Autosave hook integration ──────────────────────────────────────────
+    const { saveStatus, triggerManualSave } = useCanvasAutosave({
+      projectId: roomId,
+      nodes,
+      edges,
+    });
+
+    useEffect(() => {
+      onSaveStatusChange?.(saveStatus, triggerManualSave);
+    }, [saveStatus, triggerManualSave, onSaveStatusChange]);
+
+    // ── Rehydrate saved canvas blob when room starts empty ───────────────────
+    const initialLoadCheckedRef = useRef(false);
+
+    useEffect(() => {
+      if (initialLoadCheckedRef.current) return;
+      if (!onNodesChange || !onEdgesChange) return;
+
+      initialLoadCheckedRef.current = true;
+
+      // If the room already has nodes or edges, skip loading saved blob to avoid overwriting active collaboration
+      if (nodes.length > 0 || edges.length > 0) {
+        return;
+      }
+
+      async function fetchAndApplySavedCanvas() {
+        try {
+          const res = await fetch(`/api/projects/${roomId}/canvas`);
+          if (!res.ok) return;
+
+          const data = (await res.json()) as {
+            nodes?: CanvasNode[];
+            edges?: CanvasEdge[];
+            isSaved?: boolean;
+          };
+
+          if (
+            data.isSaved &&
+            Array.isArray(data.nodes) &&
+            Array.isArray(data.edges)
+          ) {
+            if (data.nodes.length > 0 || data.edges.length > 0) {
+              const addNodes: NodeChange<CanvasNode>[] = data.nodes.map(
+                (item) => ({ type: "add", item })
+              );
+              const addEdges: EdgeChange<CanvasEdge>[] = data.edges.map(
+                (item) => ({ type: "add", item })
+              );
+
+              onNodesChange(addNodes);
+              onEdgesChange(addEdges);
+            }
+          }
+        } catch (error) {
+          console.error("Error loading saved canvas state:", error);
+        }
+      }
+
+      fetchAndApplySavedCanvas();
+    }, [roomId, nodes.length, edges.length, onNodesChange, onEdgesChange]);
 
     const handleImportTemplate = useCallback(
       (template: CanvasTemplate) => {
@@ -219,7 +289,12 @@ export const CanvasFlow = forwardRef<CanvasFlowHandle, object>(
             nodeColor="#3a3a42"
           />
 
-          <Cursors />
+          <Cursors components={{ Cursor: CustomLiveCursor }} />
+
+          {/* Room presence avatars at top-right */}
+          <Panel position="top-right">
+            <PresenceAvatars />
+          </Panel>
 
           {/* Floating control bar at bottom-left */}
           <CanvasControls />

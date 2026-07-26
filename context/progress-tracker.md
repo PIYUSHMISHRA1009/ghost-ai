@@ -30,11 +30,50 @@ Update this file whenever the current phase, active feature, or implementation s
 - 16 — Canvas edges & connections
 - 17 — Canvas ergonomics
 - 18 — Starter templates
+- 19 — Presence avatars & cursors
+- 20 — AI sidebar shell
+- 21 — Canvas autosave & persistence
 
 ## In Progress
 
 
 ## Recently Completed
+
+### 21 — Canvas Autosave & Persistence
+
+- **Installed `@vercel/blob`**: Added Vercel Blob SDK for cloud storage of canvas JSON state.
+- **`app/api/projects/[projectId]/canvas/route.ts`**: Implemented `PUT` and `GET` canvas API routes:
+  - `PUT`: Authenticates user, verifies project access, uploads canvas JSON (`nodes` and `edges`) to Vercel Blob, and updates the returned blob URL in the Prisma `Project.canvasJsonPath` record.
+  - `GET`: Authenticates user, verifies project access, retrieves `canvasJsonPath` from Prisma, fetches canvas JSON from Vercel Blob, and returns `{ nodes, edges, isSaved }`.
+- **`hooks/use-canvas-autosave.ts`**: Built `useCanvasAutosave` hook with a 1.5s debounce timer, payload change detection to prevent redundant writes, and save status tracking (`idle`, `saving`, `saved`, `error`).
+- **`components/editor/canvas-flow.tsx`**: Integrated `useCanvasAutosave` and added initial room load check. If the Liveblocks room has 0 nodes and 0 edges on mount, fetches saved canvas JSON from Vercel Blob and populates the canvas. If the room already contains active nodes/edges, skips loading to avoid overwriting live collaboration.
+- **`components/editor/editor-navbar.tsx` & `workspace-shell-client.tsx`**: Added Save button with live status indicator (`Saving...`, `Saved`, `Save Error`, `Save`) and manual trigger.
+- **Verification**: `npx tsc --noEmit` and `npm run build` both pass with 0 errors.
+
+### 20 — AI Sidebar Shell
+
+- **`components/editor/ai-sidebar.tsx`**: Built standalone floating `AiSidebar` component:
+  - Header with `AI Workspace` title, `Collaborate with Ghost AI` subtitle, purple bot icon, and top-right close action button.
+  - Tabbed navigation using shadcn `Tabs` with `AI Architect` and `Specs` tabs.
+  - `AI Architect` tab featuring a scrollable chat thread, empty state with starter prompt chips (`Design an e-commerce backend`, `Create a chat app architecture`, `Build a CI/CD pipeline`), right-aligned user messages (`bg-accent-dim border border-brand/40`), left-aligned assistant messages (`bg-elevated border border-surface-border`), auto-resizing `<Textarea>` input (Enter submits, Shift+Enter adds newline), and send action button.
+  - `Specs` tab featuring a `Generate Spec` action button and a styled demo spec card with `FileText` icon, title, snippet, and disabled `Download Spec` button.
+- **`components/editor/workspace-shell-client.tsx`**: Replaced inline `<aside>` element with `<AiSidebar isOpen={isAiSidebarOpen} onClose={() => setIsAiSidebarOpen(false)} />`.
+- **Verification**: `npx tsc --noEmit` and `npm run build` both pass with 0 errors.
+
+### 19 — Presence Avatars & Live Cursors
+
+- **`liveblocks.config.ts`**: Updated `Presence` interface to include `cursor: { x: number; y: number } | null` and `thinking: boolean`.
+- **`components/editor/presence-avatars.tsx`**: Created `PresenceAvatars` component positioned in the top-right corner of the editor canvas view via React Flow `<Panel position="top-right">`:
+  - Excludes the current user from the collaborator presence list based on active Clerk session ID.
+  - Displays collaborator profile photos when available, falling back to uppercase initials on dark color background.
+  - Overlapping avatar stack for up to 5 collaborators with subtle ring for high dark-canvas contrast, and a `+N` overflow chip for >5 collaborators.
+  - Renders a vertical divider line between collaborators and the current user's Clerk `UserButton` ONLY when at least 1 collaborator exists.
+  - Integrates the current user's Clerk `UserButton` (30px × 30px) cleanly as part of the group.
+- **`components/editor/live-cursor.tsx`**: Created `CustomLiveCursor` component rendering a collaborator's live cursor pointer arrow and name badge attached to the cursor, styled with their deterministic presence color (`info.color`).
+- **`components/editor/canvas-flow.tsx`**: Integrated `<Panel position="top-right"><PresenceAvatars /></Panel>` and passed `CustomLiveCursor` to `<Cursors components={{ Cursor: CustomLiveCursor }} />`.
+- **`components/editor/editor-navbar.tsx`**: Added optional `hideUserButton?: boolean` prop to hide `UserButton` from top navbar when rendered inside the canvas presence group.
+- **`components/editor/workspace-shell-client.tsx`**: Passed `hideUserButton={true}` to `EditorNavbar` in workspace view.
+- **Verification**: `npx tsc --noEmit` and `npm run build` both pass with 0 errors.
 
 ### 18 — Import Template Dialog Redesign
 
