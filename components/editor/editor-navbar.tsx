@@ -1,9 +1,11 @@
 "use client";
 
-import { PanelLeftClose, PanelLeftOpen, Share2, Sparkles, FolderOpen } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, Share2, Sparkles, FolderOpen, Loader2, Check, AlertCircle, Cloud } from "lucide-react";
 import { SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { NAVBAR_HEIGHT } from "@/lib/layout-constants";
+import { cn } from "@/lib/utils";
+import type { SaveStatus } from "@/hooks/use-canvas-autosave";
 
 interface EditorNavbarProps {
   isSidebarOpen: boolean;
@@ -13,6 +15,9 @@ interface EditorNavbarProps {
   isAiSidebarOpen?: boolean;
   onAiSidebarToggle?: () => void;
   onOpenTemplates?: () => void;
+  hideUserButton?: boolean;
+  saveStatus?: SaveStatus;
+  onSave?: () => void;
 }
 
 export function EditorNavbar({
@@ -23,6 +28,9 @@ export function EditorNavbar({
   isAiSidebarOpen,
   onAiSidebarToggle,
   onOpenTemplates,
+  hideUserButton = false,
+  saveStatus,
+  onSave,
 }: EditorNavbarProps) {
   const SidebarIcon = isSidebarOpen ? PanelLeftClose : PanelLeftOpen;
 
@@ -99,6 +107,54 @@ export function EditorNavbar({
           flexShrink: 0,
         }}
       >
+        {/* Save Status & Manual Save Button */}
+        {onSave && (
+          <button
+            onClick={onSave}
+            disabled={saveStatus === "saving"}
+            title={
+              saveStatus === "saving"
+                ? "Saving canvas changes..."
+                : saveStatus === "saved"
+                ? "Canvas changes saved to cloud"
+                : saveStatus === "error"
+                ? "Error saving canvas"
+                : "Save canvas changes"
+            }
+            className={cn(
+              "inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[12px] font-medium transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00c8d4]",
+              saveStatus === "error"
+                ? "border-[#ff4d4f]/40 bg-[#ff4d4f]/10 text-[#ff4d4f]"
+                : saveStatus === "saved"
+                ? "border-[#34d399]/40 bg-[#34d399]/10 text-[#34d399]"
+                : saveStatus === "saving"
+                ? "border-[#2a2a30] bg-[#18181c] text-[#00c8d4]"
+                : "border-[#2a2a30] hover:border-[#3a3a42] bg-[#18181c] hover:bg-[#1e1e23] text-[#c0c0cc]"
+            )}
+          >
+            {saveStatus === "saving" ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#00c8d4]" />
+                <span>Saving...</span>
+              </>
+            ) : saveStatus === "saved" ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-[#34d399]" />
+                <span>Saved</span>
+              </>
+            ) : saveStatus === "error" ? (
+              <>
+                <AlertCircle className="w-3.5 h-3.5 text-[#ff4d4f]" />
+                <span>Save Error</span>
+              </>
+            ) : (
+              <>
+                <Cloud className="w-3.5 h-3.5 text-[#00c8d4]" />
+                <span>Save</span>
+              </>
+            )}
+          </button>
+        )}
         {/* Share Button */}
         {onShare && (
           <button
@@ -158,34 +214,36 @@ export function EditorNavbar({
           </SignUpButton>
         </Show>
 
-        <Show when="signed-in">
-          <UserButton
-            appearance={{
-              elements: {
-                rootBox:
-                  "flex items-center",
-                userButtonTrigger:
-                  "focus:shadow-none focus-visible:ring-2 focus-visible:ring-[#00c8d4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#111114] outline-none rounded-lg",
-                avatarBox:
-                  "h-[30px] w-[30px] rounded-lg ring-1 ring-white/10 hover:ring-white/25 transition-all",
-                userButtonPopoverCard:
-                  "bg-[#111114] border border-[#2a2a30] shadow-2xl rounded-xl",
-                userButtonPopoverActionButton:
-                  "hover:bg-[#1e1e23] rounded-lg",
-                userButtonPopoverActionButtonText:
-                  "text-[13px] text-[#c0c0cc]",
-                userButtonPopoverActionButtonIcon:
-                  "text-[#808090]",
-                userPreviewMainIdentifier:
-                  "text-[14px] font-medium text-[#f0f0f4]",
-                userPreviewSecondaryIdentifier:
-                  "text-[12px] text-[#808090]",
-                userButtonPopoverFooter:
-                  "hidden",
-              },
-            }}
-          />
-        </Show>
+        {!hideUserButton && (
+          <Show when="signed-in">
+            <UserButton
+              appearance={{
+                elements: {
+                  rootBox:
+                    "flex items-center",
+                  userButtonTrigger:
+                    "focus:shadow-none focus-visible:ring-2 focus-visible:ring-[#00c8d4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#111114] outline-none rounded-lg",
+                  avatarBox:
+                    "h-[30px] w-[30px] rounded-lg ring-1 ring-white/10 hover:ring-white/25 transition-all",
+                  userButtonPopoverCard:
+                    "bg-[#111114] border border-[#2a2a30] shadow-2xl rounded-xl",
+                  userButtonPopoverActionButton:
+                    "hover:bg-[#1e1e23] rounded-lg",
+                  userButtonPopoverActionButtonText:
+                    "text-[13px] text-[#c0c0cc]",
+                  userButtonPopoverActionButtonIcon:
+                    "text-[#808090]",
+                  userPreviewMainIdentifier:
+                    "text-[14px] font-medium text-[#f0f0f4]",
+                  userPreviewSecondaryIdentifier:
+                    "text-[12px] text-[#808090]",
+                  userButtonPopoverFooter:
+                    "hidden",
+                },
+              }}
+            />
+          </Show>
+        )}
       </div>
     </header>
   );

@@ -24,9 +24,13 @@ import { AlertTriangle, Loader2 } from "lucide-react";
 import { CanvasFlow } from "@/components/editor/canvas-flow";
 import type { CanvasTemplate } from "@/components/editor/starter-templates";
 
+import type { SaveStatus } from "@/hooks/use-canvas-autosave";
+
 export interface CanvasWrapperProps {
   /** The project ID — used as the Liveblocks room ID. */
   roomId: string;
+  /** Save status change callback. */
+  onSaveStatusChange?: (status: SaveStatus, triggerSave: () => void) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -103,12 +107,12 @@ function CanvasError() {
 export const CanvasWrapper = forwardRef<
   { importTemplate: (template: CanvasTemplate) => void },
   CanvasWrapperProps
->(function CanvasWrapper({ roomId }, ref) {
+>(function CanvasWrapper({ roomId, onSaveStatusChange }, ref) {
   return (
     <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
       <RoomProvider
         id={roomId}
-        initialPresence={{ cursor: null, isThinking: false }}
+        initialPresence={{ cursor: null, thinking: false, isThinking: false }}
       >
         <ErrorBoundary
           fallback={<CanvasError />}
@@ -118,7 +122,11 @@ export const CanvasWrapper = forwardRef<
         >
           <ClientSideSuspense fallback={<CanvasLoading />}>
             <ReactFlowProvider>
-              <CanvasFlow ref={ref} />
+              <CanvasFlow
+                ref={ref}
+                roomId={roomId}
+                onSaveStatusChange={onSaveStatusChange}
+              />
             </ReactFlowProvider>
           </ClientSideSuspense>
         </ErrorBoundary>

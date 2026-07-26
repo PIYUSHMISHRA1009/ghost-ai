@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Sparkles, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/lib/prisma";
 import {
@@ -20,6 +19,8 @@ import { ShareDialog } from "@/components/editor/share-dialog";
 import { CanvasWrapper } from "@/components/editor/canvas-wrapper";
 import { type CanvasTemplate } from "@/components/editor/starter-templates";
 import { StarterTemplatesModal } from "@/components/editor/starter-templates-modal";
+import { AiSidebar } from "@/components/editor/ai-sidebar";
+import type { SaveStatus } from "@/hooks/use-canvas-autosave";
 
 interface WorkspaceShellClientProps {
   project: Project;
@@ -35,6 +36,9 @@ export function WorkspaceShellClient({
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const manualSaveRef = useRef<(() => void) | null>(null);
+
   const canvasRef = useRef<{ importTemplate: (template: CanvasTemplate) => void }>(null);
 
   const dialogs = useProjectActions({ activeProjectId: project.id });
@@ -46,6 +50,18 @@ export function WorkspaceShellClient({
 
   const handleTemplateImport = useCallback((template: CanvasTemplate) => {
     canvasRef.current?.importTemplate(template);
+  }, []);
+
+  const handleSaveStatusChange = useCallback(
+    (status: SaveStatus, triggerSave: () => void) => {
+      setSaveStatus(status);
+      manualSaveRef.current = triggerSave;
+    },
+    []
+  );
+
+  const handleManualSave = useCallback(() => {
+    manualSaveRef.current?.();
   }, []);
 
   return (
@@ -69,6 +85,9 @@ export function WorkspaceShellClient({
         isAiSidebarOpen={isAiSidebarOpen}
         onAiSidebarToggle={() => setIsAiSidebarOpen((prev) => !prev)}
         onOpenTemplates={handleOpenTemplates}
+        hideUserButton={true}
+        saveStatus={saveStatus}
+        onSave={handleManualSave}
       />
 
       {/* Main Workspace Body */}
@@ -114,7 +133,11 @@ export function WorkspaceShellClient({
                 "0 12px 32px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.03)",
             }}
           >
-            <CanvasWrapper ref={canvasRef} roomId={project.id} />
+            <CanvasWrapper
+              ref={canvasRef}
+              roomId={project.id}
+              onSaveStatusChange={handleSaveStatusChange}
+            />
           </div>
         </main>
 
@@ -134,163 +157,10 @@ export function WorkspaceShellClient({
         )}
 
         {/* Right AI Sidebar */}
-        <aside
-          aria-label="AI Copilot"
-          inert={!isAiSidebarOpen ? true : undefined}
-          aria-hidden={!isAiSidebarOpen}
-          className={cn(
-            "fixed right-[10px] z-20 flex flex-col transition-transform duration-200 ease-out rounded-2xl overflow-hidden border border-[#2a2a30] shadow-xl",
-            isAiSidebarOpen
-              ? "translate-x-0"
-              : "translate-x-[calc(100%+20px)] pointer-events-none"
-          )}
-          style={{
-            top: CANVAS_TOP_OFFSET,
-            bottom: INSET_GUTTER,
-            width: RIGHT_SIDEBAR_WIDTH,
-            backgroundColor: "#0b0c10",
-          }}
-        >
-          {/* AI Header */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "14px 16px",
-              borderBottom: "1px solid #1a1a22",
-            }}
-          >
-            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <span
-                style={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: "#f0f0f4",
-                }}
-              >
-                AI Copilot
-              </span>
-              <span style={{ fontSize: 10, color: "#505060" }}>
-                Placeholder panel
-              </span>
-            </div>
-            <div
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: 8,
-                background: "rgba(100,87,249,0.12)",
-                border: "1px solid rgba(100,87,249,0.2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Sparkles style={{ width: 13, height: 13, color: "#8b82ff" }} />
-            </div>
-          </div>
-
-          {/* AI Body */}
-          <div
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              display: "flex",
-              flexDirection: "column",
-              gap: 10,
-              padding: "14px 12px",
-            }}
-          >
-            {/* Card 1 — Chat surface pending */}
-            <div
-              style={{
-                borderRadius: 10,
-                border: "1px solid #252530",
-                backgroundColor: "#13141c",
-                padding: "14px",
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                <div
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 8,
-                    background: "rgba(100,87,249,0.1)",
-                    border: "1px solid rgba(100,87,249,0.18)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <BookOpen
-                    style={{ width: 14, height: 14, color: "#8b82ff" }}
-                  />
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: "#c0c0cc",
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    Chat surface pending
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: "#505060",
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    The toggle is wired. Messaging and generation are intentionally out of scope here.
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Card 2 — Future Hooks */}
-            <div
-              style={{
-                borderRadius: 10,
-                border: "1px solid #252530",
-                backgroundColor: "#13141c",
-                padding: "14px",
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 9,
-                  fontWeight: 700,
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  color: "#3a3a50",
-                }}
-              >
-                Future Hooks
-              </span>
-              <span
-                style={{
-                  fontSize: 11,
-                  color: "#505060",
-                  lineHeight: 1.55,
-                }}
-              >
-                Prompt composer, run status, and architecture guidance will attach to this sidebar.
-              </span>
-            </div>
-          </div>
-        </aside>
+        <AiSidebar
+          isOpen={isAiSidebarOpen}
+          onClose={() => setIsAiSidebarOpen(false)}
+        />
       </div>
 
       {/* Project Mutation Dialogs */}

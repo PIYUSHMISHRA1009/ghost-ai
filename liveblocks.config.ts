@@ -16,7 +16,9 @@ declare global {
       /** Canvas pointer coordinates, or null when the cursor is off-canvas. */
       cursor: { x: number; y: number } | null;
       /** True while the AI is generating output on behalf of this user. */
-      isThinking: boolean;
+      thinking: boolean;
+      /** Backward compatibility flag for AI thinking status. */
+      isThinking?: boolean;
     };
 
     /**
